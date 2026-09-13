@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Duit Kira — Student Money Tracker</title>
+<meta name="description" content="A simple, private money tracker for Malaysian university students. Track PTPTN, budgets and daily spending — all stored on your own device." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<a class="skip-link" href="#page-content">Skip to main content</a>
+
+<!-- Icon sprite (referenced via <use>) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="icon-home" viewBox="0 0 24 24"><path d="M3.5 11.5 12 4l8.5 7.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v9a1 1 0 0 0 1 1H17.5a1 1 0 0 0 1-1v-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 20v-5.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V20" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-receipt" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-2.5-1.6-2.5 1.6-2.5-1.6-2.5 1.6z" stroke-linejoin="round" stroke-linecap="round"/><path d="M9 8.5h6M9 12h6M9 15.5h3.5" stroke-linecap="round"/></symbol>
+    <symbol id="icon-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="icon-cap" viewBox="0 0 24 24"><path d="M12 4 2.5 8.5 12 13l9.5-4.5z" stroke-linejoin="round" stroke-linecap="round"/><path d="M6.5 10.7v4.4c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 9v5.5" stroke-linecap="round"/></symbol>
+    <symbol id="icon-piggy" viewBox="0 0 24 24"><path d="M5 12.2c0-3 2.9-5.2 6.6-5.2.7 0 1.4-.4 1.8-1l.9-1.4 1 2h1.2v2.6l-1.6.9v2.4c0 1.2-1 2.1-2.1 2.1h-.4v1.9H9.9v-1.9H8.4c-1.9 0-3.4-1.5-3.4-3.4z" stroke-linejoin="round" stroke-linecap="round"/><circle cx="9.3" cy="11.8" r="0.6" fill="currentColor" stroke="none"/><path d="M2.7 11.3 5 12.2" stroke-linecap="round"/></symbol>
+    <symbol id="icon-chart" viewBox="0 0 24 24"><path d="M3 21h18" stroke-linecap="round"/><rect x="5" y="11" width="3.2" height="8" rx="0.8"/><rect x="10.4" y="6.5" width="3.2" height="12.5" rx="0.8"/><rect x="15.8" y="14" width="3.2" height="5" rx="0.8"/></symbol>
+    <symbol id="icon-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M4.4 4.4l2.1 2.1M17.5 17.5l2.1 2.1M2.5 12h3M18.5 12h3M4.4 19.6l2.1-2.1M17.5 6.5l2.1-2.1" stroke-linecap="round"/></symbol>
+    <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" stroke-linecap="round"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></symbol>
+    <symbol id="icon-minus" viewBox="0 0 24 24"><path d="M5 12h14" stroke-linecap="round"/></symbol>
+    <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M12 3.5 21.5 20h-19z" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 9.5v5" stroke-linecap="round"/><circle cx="12" cy="17.3" r="0.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="icon-repeat" viewBox="0 0 24 24"><path d="M4.5 11.5v-2a4 4 0 0 1 4-4h9M20 4.5v4h-4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.5 12.5v2a4 4 0 0 1-4 4h-9M4 19.5v-4h4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div id="app">
+
+  <!-- Decorative backdrop (purely visual, aria-hidden) -->
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <!-- Desktop / tablet sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <span class="sidebar__coin" aria-hidden="true">🪙</span>
+      <span class="sidebar__name">Duit Kira</span>
+    </div>
+
+    <nav class="sidebar__nav" id="sidebar-nav" aria-label="Main navigation">
+      <button class="navlink" data-page="dashboard" aria-current="page">
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-home"/></svg><span>Dashboard</span>
+      </button>
+      <button class="navlink" data-page="transactions">
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-receipt"/></svg><span>Transactions</span>
+      </button>
+      <button class="navlink" data-page="budget">
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-target"/></svg><span>Budget</span>
+      </button>
+      <button class="navlink" data-page="ptptn">
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-cap"/></svg><span>PTPTN</span>
+      </button>
+      <button class="navlink" data-page="savings">
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-piggy"/></svg><span>Savings</span>
+      </button>
+      <button class="navlink" data-page="analytics">
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-chart"/></svg><span>Analytics</span>
+      </button>
+      <button class="navlink" data-page="settings">
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-gear"/></svg><span>Settings</span>
+      </button>
+    </nav>
+
+    <button class="sidebar__darkmode" id="darkmode-toggle" type="button" aria-pressed="false">
+      <svg class="sidebar__darkmode-icon" id="darkmode-icon" aria-hidden="true"><use href="#icon-moon"/></svg> <span id="darkmode-label">Dark mode</span>
+    </button>
+  </aside>
+
+  <!-- Main column -->
+  <div class="main">
+    <header class="topbar">
+      <h1 class="topbar__title" id="page-title">Dashboard</h1>
+      <div class="topbar__right">
+        <label class="semester-select">
+          <span class="semester-select__label">Semester</span>
+          <select id="global-semester-select" aria-label="Current semester"></select>
+        </label>
+      </div>
+    </header>
+
+    <main class="page-content" id="page-content" tabindex="-1">
+      <!-- rendered by app.js -->
+    </main>
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="bottom-nav" id="bottom-nav" aria-label="Main navigation">
+    <button class="bottom-nav__link" data-page="dashboard" aria-current="page">
+      <svg aria-hidden="true"><use href="#icon-home"/></svg><small>Home</small>
+    </button>
+    <button class="bottom-nav__link" data-page="transactions">
+      <svg aria-hidden="true"><use href="#icon-receipt"/></svg><small>Txns</small>
+    </button>
+    <button class="bottom-nav__link" data-page="budget">
+      <svg aria-hidden="true"><use href="#icon-target"/></svg><small>Budget</small>
+    </button>
+    <button class="bottom-nav__link" data-page="analytics">
+      <svg aria-hidden="true"><use href="#icon-chart"/></svg><small>Stats</small>
+    </button>
+    <button class="bottom-nav__link" data-page="settings">
+      <svg aria-hidden="true"><use href="#icon-gear"/></svg><small>More</small>
+    </button>
+  </nav>
+
+  <!-- Floating add button -->
+  <div class="fab-wrap">
+    <button class="fab" id="fab-add" type="button" aria-label="Add transaction" aria-haspopup="true" aria-expanded="false">
+      <svg aria-hidden="true"><use href="#icon-plus"/></svg>
+    </button>
+    <div class="fab-menu" id="fab-menu" hidden role="menu">
+      <button type="button" data-fab-action="expense" role="menuitem"><svg aria-hidden="true"><use href="#icon-minus"/></svg>Add expense</button>
+      <button type="button" data-fab-action="income" role="menuitem"><svg aria-hidden="true"><use href="#icon-plus"/></svg>Add income</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal__header">
+      <h2 id="modal-title">Title</h2>
+      <button type="button" class="modal__close" id="modal-close" aria-label="Close dialog">✕</button>
+    </div>
+    <div class="modal__body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/calculations.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
