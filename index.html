@@ -793,6 +793,29 @@ body.dark-mode .warning-item { color: var(--text); }
 body.dark-mode .fab-menu button:hover { background: var(--surface-2); }
 .fab-menu button + button { border-top: 1px solid var(--border); }
 
+/* ---- "More" list menu (used in the mobile More modal) ---- */
+.list-menu { display: flex; flex-direction: column; gap: 4px; }
+.list-menu button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: none;
+  background: var(--pale-blue);
+  color: var(--text);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s var(--ease), transform 0.12s var(--ease);
+}
+.list-menu button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; flex-shrink: 0; }
+.list-menu button:hover { background: #CDE6F7; transform: translateX(2px); }
+body.dark-mode .list-menu button { background: var(--surface-2); }
+body.dark-mode .list-menu button:hover { background: #2C3D57; }
+
 /* ============================================
    Responsive
    ============================================ */
@@ -868,6 +891,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     <symbol id="icon-minus" viewBox="0 0 24 24"><path d="M5 12h14" stroke-linecap="round"/></symbol>
     <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M12 3.5 21.5 20h-19z" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 9.5v5" stroke-linecap="round"/><circle cx="12" cy="17.3" r="0.6" fill="currentColor" stroke="none"/></symbol>
     <symbol id="icon-repeat" viewBox="0 0 24 24"><path d="M4.5 11.5v-2a4 4 0 0 1 4-4h9M20 4.5v4h-4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.5 12.5v2a4 4 0 0 1-4 4h-9M4 19.5v-4h4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol>
   </defs>
 </svg>
 
@@ -943,8 +967,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     <button class="bottom-nav__link" data-page="analytics">
       <svg aria-hidden="true"><use href="#icon-chart"/></svg><small>Stats</small>
     </button>
-    <button class="bottom-nav__link" data-page="settings">
-      <svg aria-hidden="true"><use href="#icon-gear"/></svg><small>More</small>
+    <button class="bottom-nav__link" id="bottom-nav-more" type="button" aria-haspopup="true">
+      <svg aria-hidden="true"><use href="#icon-more"/></svg><small>More</small>
     </button>
   </nav>
 
@@ -1708,9 +1732,11 @@ const App = {
 
   // ---------------- navigation ----------------
   bindGlobalEvents() {
-    document.querySelectorAll('.navlink, .bottom-nav__link').forEach((btn) => {
+    document.querySelectorAll('.navlink[data-page], .bottom-nav__link[data-page]').forEach((btn) => {
       btn.addEventListener('click', () => this.navigate(btn.dataset.page));
     });
+
+    document.getElementById('bottom-nav-more').addEventListener('click', () => this.openMoreMenu());
 
     document.getElementById('darkmode-toggle').addEventListener('click', () => {
       const isDark = !document.body.classList.contains('dark-mode');
@@ -1768,10 +1794,13 @@ const App = {
 
   navigate(page) {
     this.state.page = page;
-    document.querySelectorAll('.navlink, .bottom-nav__link').forEach((btn) => {
+    document.querySelectorAll('.navlink[data-page], .bottom-nav__link[data-page]').forEach((btn) => {
       if (btn.dataset.page === page) btn.setAttribute('aria-current', 'page');
       else btn.removeAttribute('aria-current');
     });
+    const moreBtn = document.getElementById('bottom-nav-more');
+    if (['ptptn', 'savings', 'settings'].includes(page)) moreBtn.setAttribute('aria-current', 'page');
+    else moreBtn.removeAttribute('aria-current');
     const titles = {
       dashboard: 'Dashboard', transactions: 'Transactions', budget: 'Budget Planner',
       ptptn: 'PTPTN Planning', savings: 'Savings Goals', analytics: 'Analytics', settings: 'Settings',
@@ -1780,6 +1809,31 @@ const App = {
     this.renderCurrentPage();
     this.el.focus();
     window.scrollTo({ top: 0, behavior: 'auto' });
+  },
+
+  openMoreMenu() {
+    const items = [
+      { page: 'ptptn', icon: 'icon-cap', label: 'PTPTN Planning' },
+      { page: 'savings', icon: 'icon-piggy', label: 'Savings Goals' },
+      { page: 'settings', icon: 'icon-gear', label: 'Settings' },
+    ];
+    const body = `
+      <div class="list-menu">
+        ${items.map((i) => `
+          <button type="button" data-more-page="${i.page}">
+            <svg aria-hidden="true"><use href="#${i.icon}"/></svg>
+            <span>${UI.escapeHtml(i.label)}</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    UI.openModal('More', body);
+    document.querySelectorAll('[data-more-page]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        UI.closeModal();
+        this.navigate(btn.dataset.morePage);
+      });
+    });
   },
 
   timeGreeting() {
