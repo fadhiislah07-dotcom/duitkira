@@ -57,13 +57,21 @@ const App = {
     const fabMenu = document.getElementById('fab-menu');
     fab.addEventListener('click', () => {
       fabMenu.hidden = !fabMenu.hidden;
+      fab.setAttribute('aria-expanded', String(!fabMenu.hidden));
+      fab.classList.toggle('fab--open', !fabMenu.hidden);
     });
     document.addEventListener('click', (e) => {
-      if (!fab.contains(e.target) && !fabMenu.contains(e.target)) fabMenu.hidden = true;
+      if (!fab.contains(e.target) && !fabMenu.contains(e.target)) {
+        fabMenu.hidden = true;
+        fab.setAttribute('aria-expanded', 'false');
+        fab.classList.remove('fab--open');
+      }
     });
     fabMenu.querySelectorAll('[data-fab-action]').forEach((btn) => {
       btn.addEventListener('click', () => {
         fabMenu.hidden = true;
+        fab.setAttribute('aria-expanded', 'false');
+        fab.classList.remove('fab--open');
         this.openTransactionForm(btn.dataset.fabAction);
       });
     });
@@ -72,7 +80,8 @@ const App = {
   applyDarkMode(isDark) {
     document.body.classList.toggle('dark-mode', isDark);
     document.getElementById('darkmode-toggle').setAttribute('aria-pressed', String(isDark));
-    document.getElementById('darkmode-icon').textContent = isDark ? '☀️' : '🌙';
+    const use = document.querySelector('#darkmode-icon use');
+    if (use) use.setAttribute('href', isDark ? '#icon-sun' : '#icon-moon');
     document.getElementById('darkmode-label').textContent = isDark ? 'Light mode' : 'Dark mode';
   },
 
@@ -97,6 +106,13 @@ const App = {
     this.renderCurrentPage();
     this.el.focus();
     window.scrollTo({ top: 0, behavior: 'auto' });
+  },
+
+  timeGreeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
   },
 
   renderCurrentPage() {
@@ -137,11 +153,27 @@ const App = {
     const avgDaily = Calc.averageDailySpending(all);
     const txCount = all.length;
 
+    const greeting = this.timeGreeting();
+
     this.el.innerHTML = `
+      <section class="hero-card" aria-label="Balance overview">
+        <div class="hero-card__decor" aria-hidden="true"></div>
+        <div class="hero-card__top">
+          <span class="hero-card__eyebrow">${greeting} · ${UI.escapeHtml(currentSemester)}</span>
+          <span class="hero-card__balance-label">Your total balance</span>
+          <span class="hero-card__balance ${balance < 0 ? 'hero-card__balance--neg' : ''}">${Calc.formatMoney(balance)}</span>
+          <div class="hero-card__pills">
+            <span class="hero-pill hero-pill--income">↑ ${Calc.formatMoney(totalIncome)} received</span>
+            <span class="hero-pill hero-pill--expense">↓ ${Calc.formatMoney(totalExpense)} spent</span>
+          </div>
+        </div>
+        <div class="hero-card__actions">
+          <button class="btn btn--primary" id="dash-add-expense"><svg aria-hidden="true"><use href="#icon-minus"/></svg>Add expense</button>
+          <button class="btn btn--hero-secondary" id="dash-add-income"><svg aria-hidden="true"><use href="#icon-plus"/></svg>Add income</button>
+        </div>
+      </section>
+
       <div class="card-grid">
-        ${this.statCard('Total balance', Calc.formatMoney(balance), balance < 0 ? 'expense' : '')}
-        ${this.statCard('Total received', Calc.formatMoney(totalIncome), 'income')}
-        ${this.statCard('Total spent', Calc.formatMoney(totalExpense), 'expense')}
         ${this.statCard('Remaining monthly budget', Calc.formatMoney(remainingMonthBudget), remainingMonthBudget < 0 ? 'expense' : '')}
         ${this.statCard("This month's spending", Calc.formatMoney(monthSpent))}
         ${this.statCard("This month's budget", Calc.formatMoney(monthBudget))}
@@ -150,12 +182,7 @@ const App = {
         ${this.statCard('Transactions', String(txCount))}
       </div>
 
-      <div class="btn-row">
-        <button class="btn btn--primary" id="dash-add-expense">➖ Add expense</button>
-        <button class="btn btn--secondary" id="dash-add-income">➕ Add income</button>
-      </div>
-
-      <div class="section-title"><h2>💸 Money Runway</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-cap"/></svg>Money Runway</h2></div>
       <div class="card" id="runway-card"></div>
 
       <div class="two-col" style="margin-top:20px;">
@@ -169,10 +196,10 @@ const App = {
         </div>
       </div>
 
-      <div class="section-title"><h2>⚠️ Smart warnings</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-alert"/></svg>Smart warnings</h2></div>
       <div id="warnings-wrap"></div>
 
-      <div class="section-title"><h2>📅 Budget progress</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-target"/></svg>Budget progress</h2></div>
       <div class="card" id="dash-budget-progress"></div>
 
       <div class="section-title">
@@ -1280,7 +1307,7 @@ const App = {
       <div class="section-title" style="margin-top:0;"><h2>Semester management</h2></div>
       <div class="card" id="semester-mgmt"></div>
 
-      <div class="section-title"><h2>🔁 Recurring expenses</h2>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-repeat"/></svg>Recurring expenses</h2>
         <button class="btn btn--primary btn--sm" id="add-recurring">+ Add recurring</button>
       </div>
       <div class="card" id="recurring-wrap"></div>
