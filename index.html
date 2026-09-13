@@ -1032,7 +1032,7 @@ const PAYMENT_METHODS = ['Cash', 'Debit card', 'Bank transfer', 'E-wallet'];
 
 const DEFAULT_SETTINGS = {
   currentSemester: 'Semester 1',
-  semesters: ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4'],
+  semesters: Array.from({ length: 10 }, (_, i) => `Semester ${i + 1}`),
   semesterDates: {}, // { 'Semester 1': { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' } }
   monthlyBudget: 0,
   semesterBudgets: {}, // { 'Semester 1': amount }
@@ -1077,7 +1077,13 @@ const Store = {
       return { ...DEFAULT_SETTINGS };
     }
     // merge in any new default keys added by future versions
-    return { ...DEFAULT_SETTINGS, ...s };
+    const merged = { ...DEFAULT_SETTINGS, ...s };
+    // top up the semester list for people who saved data back when there
+    // were only 4 (or fewer) semesters — keeps any custom names, just adds more slots
+    if (Array.isArray(merged.semesters) && merged.semesters.length < DEFAULT_SETTINGS.semesters.length) {
+      merged.semesters = merged.semesters.concat(DEFAULT_SETTINGS.semesters.slice(merged.semesters.length));
+    }
+    return merged;
   },
   saveSettings(partial) {
     const current = this.getSettings();
