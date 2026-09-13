@@ -6,28 +6,34 @@
 <title>Duit Kira — Student Money Tracker</title>
 <meta name="description" content="A simple, private money tracker for Malaysian university students. Track PTPTN, budgets and daily spending — all stored on your own device." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ============================================
    Duit Kira — Student Money Tracker
    Design tokens
+   (Fonts are linked in index.html <head> — Plus Jakarta Sans
+   for display/headings, Manrope for body text.)
    ============================================ */
 :root {
   --navy: #172B4D;
+  --navy-deep: #0E1D36;
   --baby-blue: #A9D6F5;
   --cream: #F5EBDD;
   --off-white: #FAF9F6;
   --soft-blue: #6FA8C9;
   --pale-blue: #DCEFFA;
   --dark-text: #202A36;
-  --muted-grey: #7B8490;
+  --muted-grey: #6B7684;
 
-  --income: #6FA787;
+  --income: #5E9873;
   --income-bg: #E7F1EA;
-  --expense: #C97A6D;
+  --expense: #BE6B5D;
   --expense-bg: #F6E9E6;
-  --warning: #C79A4B;
+  --warning: #B78A38;
   --warning-bg: #F6EEDD;
-  --info: #6FA8C9;
+  --info: #5E97BE;
   --info-bg: #E4F1F8;
 
   --bg: var(--off-white);
@@ -38,16 +44,22 @@
   --border: rgba(23, 43, 77, 0.10);
   --shadow: 0 4px 16px rgba(23, 43, 77, 0.07);
   --shadow-lift: 0 10px 30px rgba(23, 43, 77, 0.14);
+  --shadow-hover: 0 8px 22px rgba(23, 43, 77, 0.12);
 
   --radius-sm: 10px;
   --radius: 16px;
   --radius-lg: 22px;
+  --radius-xl: 26px;
 
   --sidebar-w: 232px;
   --topbar-h: 68px;
   --bottom-nav-h: 64px;
 
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', var(--font-body);
 }
 
 body.dark-mode {
@@ -59,7 +71,9 @@ body.dark-mode {
   --border: rgba(248, 250, 252, 0.10);
   --shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
   --shadow-lift: 0 12px 34px rgba(0, 0, 0, 0.45);
+  --shadow-hover: 0 8px 26px rgba(0, 0, 0, 0.4);
   --navy: #A9D6F5;
+  --navy-deep: #0B1220;
   --baby-blue: #7DBCE3;
   --income-bg: #1C332A;
   --expense-bg: #34221F;
@@ -76,17 +90,52 @@ body {
   color: var(--text);
   font-family: var(--font-body);
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.25s var(--ease), color 0.25s var(--ease);
 }
 body.no-scroll { overflow: hidden; }
 
-h1, h2, h3, h4 { margin: 0 0 4px; font-weight: 700; letter-spacing: -0.01em; }
+h1, h2, h3, h4 { margin: 0 0 4px; font-family: var(--font-display); font-weight: 700; letter-spacing: -0.015em; }
 p { margin: 0 0 8px; }
 button { font-family: inherit; }
 a { color: inherit; }
 
-::selection { background: var(--baby-blue); color: var(--navy); }
+::selection { background: var(--baby-blue); color: var(--navy-deep); }
+
+/* Skip link — hidden until keyboard-focused, first thing in tab order */
+.skip-link {
+  position: fixed;
+  top: -60px;
+  left: 12px;
+  z-index: 999;
+  background: var(--navy);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top 0.2s var(--ease);
+}
+.skip-link:focus-visible { top: 12px; }
+
+/* Ambient backdrop — a couple of very soft, fixed colour washes behind
+   the whole app. Subtle on purpose: texture, not decoration for its own sake. */
+.ambient-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(680px circle at 8% -8%, rgba(169, 214, 245, 0.28), transparent 60%),
+    radial-gradient(560px circle at 100% 18%, rgba(245, 235, 221, 0.5), transparent 55%);
+}
+body.dark-mode .ambient-glow {
+  background:
+    radial-gradient(680px circle at 8% -8%, rgba(125, 188, 227, 0.10), transparent 60%),
+    radial-gradient(560px circle at 100% 18%, rgba(125, 188, 227, 0.06), transparent 55%);
+}
 
 /* ============================================
    App shell / layout
@@ -94,12 +143,13 @@ a { color: inherit; }
 #app {
   display: flex;
   min-height: 100vh;
+  position: relative;
 }
 
 .sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
-  background: var(--navy);
+  background: linear-gradient(175deg, var(--navy) 0%, var(--navy-deep) 100%);
   color: #EAF2FB;
   display: flex;
   flex-direction: column;
@@ -107,20 +157,36 @@ a { color: inherit; }
   position: sticky;
   top: 0;
   height: 100vh;
+  transition: background 0.25s var(--ease);
 }
-body.dark-mode .sidebar { background: #0B1220; }
+body.dark-mode .sidebar { background: linear-gradient(175deg, #0F1B30 0%, #080D18 100%); }
 
 .sidebar__brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 10px 26px;
-  font-weight: 800;
-  font-size: 19px;
+  padding: 4px 10px 24px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18.5px;
+  letter-spacing: -0.01em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 18px;
 }
-.sidebar__coin { font-size: 22px; }
+.sidebar__coin {
+  font-size: 18px;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: radial-gradient(circle at 30% 25%, rgba(169, 214, 245, 0.55), rgba(169, 214, 245, 0.12) 70%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
 
-.sidebar__nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.sidebar__nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
 
 .navlink {
   display: flex;
@@ -128,18 +194,48 @@ body.dark-mode .sidebar { background: #0B1220; }
   gap: 12px;
   border: none;
   background: transparent;
-  color: rgba(234, 242, 251, 0.78);
+  color: rgba(234, 242, 251, 0.72);
   padding: 11px 12px;
   border-radius: var(--radius-sm);
   font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.18s var(--ease), color 0.18s var(--ease), transform 0.18s var(--ease);
 }
-.navlink:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
-.navlink[aria-current="page"] { background: var(--baby-blue); color: var(--navy); }
-.navlink__icon { font-size: 17px; width: 20px; text-align: center; }
+.navlink:hover { background: rgba(255, 255, 255, 0.08); color: #fff; transform: translateX(2px); }
+.navlink[aria-current="page"] {
+  background: var(--baby-blue);
+  color: var(--navy-deep);
+  box-shadow: 0 4px 14px rgba(169, 214, 245, 0.3);
+}
+.navlink[aria-current="page"]:hover { transform: none; }
+.navlink__icon { flex-shrink: 0; }
+
+/* ---- Icon sprite sizing ----
+   All icons render via <svg><use href="#icon-x"/></svg>; each context
+   sets its own size, everything else (stroke, no fill) is shared. */
+.navlink svg,
+.bottom-nav__link svg,
+.sidebar__darkmode svg,
+.section-title__icon,
+.btn svg,
+.fab svg,
+.fab-menu svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.navlink svg { width: 18px; height: 18px; }
+.bottom-nav__link svg { width: 20px; height: 20px; }
+.sidebar__darkmode svg { width: 15px; height: 15px; }
+.section-title__icon { width: 16px; height: 16px; margin-right: 7px; position: relative; top: -1px; }
+.btn svg { width: 15px; height: 15px; }
+.fab-menu svg { width: 15px; height: 15px; }
+.fab svg { width: 22px; height: 22px; transition: transform 0.25s var(--ease-snap); }
+.fab.fab--open svg { transform: rotate(45deg); }
 
 .sidebar__darkmode {
   display: flex;
@@ -154,8 +250,10 @@ body.dark-mode .sidebar { background: #0B1220; }
   font-size: 13.5px;
   font-weight: 600;
   margin-top: 12px;
+  transition: background 0.18s var(--ease), transform 0.12s var(--ease);
 }
 .sidebar__darkmode:hover { background: rgba(255, 255, 255, 0.12); }
+.sidebar__darkmode:active { transform: scale(0.97); }
 
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
@@ -171,7 +269,7 @@ body.dark-mode .sidebar { background: #0B1220; }
   z-index: 5;
   border-bottom: 1px solid var(--border);
 }
-.topbar__title { font-size: 21px; }
+.topbar__title { font-size: 21px; letter-spacing: -0.02em; }
 .topbar__right { display: flex; align-items: center; gap: 12px; }
 
 .semester-select { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
@@ -184,7 +282,9 @@ body.dark-mode .sidebar { background: #0B1220; }
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
+.semester-select select:hover { border-color: var(--soft-blue); }
 
 .page-content {
   padding: 24px 28px 100px;
@@ -201,6 +301,7 @@ body.dark-mode .sidebar { background: #0B1220; }
   padding: 20px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
+  transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease), background 0.25s var(--ease), border-color 0.25s var(--ease);
 }
 .card--cream { background: var(--cream); border-color: transparent; }
 body.dark-mode .card--cream { background: var(--surface-2); }
@@ -212,20 +313,114 @@ body.dark-mode .card--cream { background: var(--surface-2); }
   margin-bottom: 20px;
 }
 
-.stat-card { display: flex; flex-direction: column; gap: 6px; }
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--baby-blue), var(--soft-blue));
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+}
+.stat-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+.stat-card:hover::before { opacity: 1; }
 .stat-card__label { font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
-.stat-card__value { font-size: 24px; font-weight: 800; color: var(--text); }
+.stat-card__value { font-family: var(--font-display); font-size: 23px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
 .stat-card__value--income { color: var(--income); }
 .stat-card__value--expense { color: var(--expense); }
 .stat-card__sub { font-size: 12px; color: var(--text-muted); }
+
+/* ---- Dashboard hero ---- */
+.hero-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%);
+  color: #F2F7FC;
+  border: none;
+  border-radius: var(--radius-xl);
+  padding: 28px 26px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-lift);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+.hero-card__decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 100% -10%, rgba(169, 214, 245, 0.38), transparent 55%),
+    radial-gradient(circle at -6% 115%, rgba(111, 168, 201, 0.28), transparent 60%);
+}
+.hero-card__top { position: relative; z-index: 1; display: flex; flex-direction: column; }
+.hero-card__eyebrow {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(242, 247, 252, 0.68);
+  margin-bottom: 10px;
+}
+.hero-card__balance-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(242, 247, 252, 0.68);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 4px;
+}
+.hero-card__balance {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5.2vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.hero-card__balance--neg { color: #F3C7BE; }
+.hero-card__pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.hero-pill--income { color: #BFE3CC; }
+.hero-pill--expense { color: #F3CCC3; }
+.hero-card__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn--hero-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+.btn--hero-secondary:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+.hero-card .btn svg { stroke: currentColor; }
 
 .section-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 26px 0 12px;
+  margin: 30px 0 12px;
 }
-.section-title h2 { font-size: 17px; }
+.section-title h2 { font-size: 16.5px; letter-spacing: -0.01em; }
 .section-title:first-child { margin-top: 0; }
 
 .two-col {
@@ -250,19 +445,24 @@ body.dark-mode .card--cream { background: var(--surface-2); }
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), opacity 0.15s var(--ease), background 0.2s var(--ease);
 }
-.btn:active { transform: scale(0.97); }
-.btn--primary { background: var(--navy); color: #fff; }
-.btn--primary:hover { box-shadow: 0 6px 16px rgba(23,43,77,0.25); }
-.btn--secondary { background: var(--baby-blue); color: var(--navy); }
+.btn:active { transform: scale(0.96); }
+.btn--primary { background: var(--navy); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 4px 10px rgba(23,43,77,0.18); }
+.btn--primary:hover { box-shadow: 0 1px 0 rgba(255,255,255,0.1) inset, 0 8px 20px rgba(23,43,77,0.28); transform: translateY(-1px); }
+.btn--secondary { background: var(--baby-blue); color: var(--navy-deep); }
+.btn--secondary:hover { box-shadow: 0 6px 16px rgba(169,214,245,0.4); transform: translateY(-1px); }
 .btn--soft { background: var(--pale-blue); color: var(--navy); }
+.btn--soft:hover { background: #CDE6F7; }
 .btn--ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn--ghost:hover { background: var(--pale-blue); border-color: transparent; }
+body.dark-mode .btn--ghost:hover { background: var(--surface-2); }
 .btn--danger { background: var(--expense); color: #fff; }
+.btn--danger:hover { box-shadow: 0 6px 16px rgba(190,107,93,0.35); transform: translateY(-1px); }
 .btn--sm { padding: 7px 12px; font-size: 13px; border-radius: 8px; }
 .btn--block { width: 100%; }
 .btn--icon { padding: 8px; border-radius: 8px; }
-.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
 
@@ -276,7 +476,7 @@ body.dark-mode .card--cream { background: var(--surface-2); }
 .form-field input,
 .form-field select,
 .form-field textarea {
-  border: 1.5px solid var(--border);
+  border: 1.5px solid transparent;
   background: var(--pale-blue);
   color: var(--text);
   padding: 10px 12px;
@@ -284,6 +484,7 @@ body.dark-mode .card--cream { background: var(--surface-2); }
   font-size: 14.5px;
   font-family: inherit;
   width: 100%;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
 body.dark-mode .form-field input,
 body.dark-mode .form-field select,
@@ -293,8 +494,9 @@ body.dark-mode .form-field textarea {
 .form-field input:focus,
 .form-field select:focus,
 .form-field textarea:focus {
-  outline: 2px solid var(--soft-blue);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--soft-blue);
+  box-shadow: 0 0 0 3px rgba(111, 168, 201, 0.2);
 }
 .form-field textarea { resize: vertical; min-height: 60px; }
 .form-error { color: var(--expense); font-size: 12px; min-height: 15px; }
@@ -312,7 +514,9 @@ fieldset { border: none; padding: 0; margin: 0; }
   border-radius: var(--radius-sm);
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.18s var(--ease), color 0.18s var(--ease), border-color 0.18s var(--ease), transform 0.12s var(--ease);
 }
+.type-toggle button:active { transform: scale(0.97); }
 .type-toggle button.is-active.type-expense { background: var(--expense-bg); color: var(--expense); border-color: var(--expense); }
 .type-toggle button.is-active.type-income { background: var(--income-bg); color: var(--income); border-color: var(--income); }
 
@@ -321,14 +525,18 @@ fieldset { border: none; padding: 0; margin: 0; }
    ============================================ */
 .modal-backdrop {
   position: fixed; inset: 0;
-  background: rgba(23, 43, 77, 0.38);
-  display: none;
+  background: rgba(14, 29, 54, 0.44);
+  display: flex;
   align-items: flex-end;
   justify-content: center;
   z-index: 100;
   padding: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease), visibility 0.25s var(--ease);
 }
-.modal-backdrop.is-open { display: flex; }
+.modal-backdrop.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
 .modal {
   background: var(--surface);
   width: 100%;
@@ -338,17 +546,25 @@ fieldset { border: none; padding: 0; margin: 0; }
   border-radius: 20px 20px 0 0;
   box-shadow: var(--shadow-lift);
   padding: 20px 20px 26px;
+  transform: translateY(24px);
+  opacity: 0;
+  transition: transform 0.3s var(--ease), opacity 0.25s var(--ease);
 }
+.modal-backdrop.is-open .modal { transform: translateY(0); opacity: 1; }
 .modal__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .modal__close {
   border: none; background: var(--pale-blue); color: var(--navy);
   width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 14px;
+  transition: background 0.15s var(--ease), transform 0.15s var(--ease);
 }
+.modal__close:hover { background: #CDE6F7; }
+.modal__close:active { transform: scale(0.9); }
 body.dark-mode .modal__close { background: var(--surface-2); color: var(--text); }
 
 @media (min-width: 640px) {
   .modal-backdrop { align-items: center; }
-  .modal { border-radius: 20px; }
+  .modal { border-radius: 20px; transform: translateY(10px) scale(0.98); }
+  .modal-backdrop.is-open .modal { transform: translateY(0) scale(1); }
 }
 
 .toast-container {
@@ -391,7 +607,7 @@ body.dark-mode .modal__close { background: var(--surface-2); color: var(--text);
   overflow: hidden;
 }
 body.dark-mode .progress-track { background: var(--surface-2); }
-.progress-fill { height: 100%; border-radius: 999px; transition: width 0.3s ease; background: var(--soft-blue); }
+.progress-fill { height: 100%; border-radius: 999px; transition: width 0.5s var(--ease); background: var(--soft-blue); }
 .progress-fill--ok { background: var(--income); }
 .progress-fill--mid { background: var(--soft-blue); }
 .progress-fill--high { background: var(--warning); }
@@ -431,7 +647,10 @@ table.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; mi
 .row-actions button {
   border: none; background: var(--pale-blue); color: var(--navy);
   width: 28px; height: 28px; border-radius: 8px; cursor: pointer; font-size: 13px;
+  transition: background 0.15s var(--ease), transform 0.12s var(--ease);
 }
+.row-actions button:hover { background: #CDE6F7; transform: translateY(-1px); }
+.row-actions button:active { transform: scale(0.92); }
 body.dark-mode .row-actions button { background: var(--surface-2); color: var(--text); }
 
 .tx-list { display: flex; flex-direction: column; gap: 2px; }
@@ -444,9 +663,9 @@ body.dark-mode .row-actions button { background: var(--surface-2); color: var(--
 .tx-row__left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .tx-row__icon {
   width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-  background: var(--pale-blue); font-size: 17px; flex-shrink: 0;
+  background: linear-gradient(160deg, var(--pale-blue), var(--cream)); font-size: 17px; flex-shrink: 0;
 }
-body.dark-mode .tx-row__icon { background: var(--surface-2); }
+body.dark-mode .tx-row__icon { background: linear-gradient(160deg, var(--surface-2), #2C3D57); }
 .tx-row__info { min-width: 0; }
 .tx-row__title { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
 .tx-row__meta { font-size: 12px; color: var(--text-muted); }
@@ -479,8 +698,16 @@ body.dark-mode .tx-row__icon { background: var(--surface-2); }
   padding: 46px 20px;
   color: var(--text-muted);
 }
-.empty-state__icon { font-size: 34px; margin-bottom: 10px; }
-.empty-state p { margin-bottom: 16px; font-size: 14px; }
+.empty-state__icon {
+  font-size: 26px;
+  width: 56px; height: 56px;
+  margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--pale-blue), var(--cream));
+}
+body.dark-mode .empty-state__icon { background: linear-gradient(160deg, var(--surface-2), #2C3D57); }
+.empty-state p { margin-bottom: 16px; font-size: 14px; max-width: 320px; margin-left: auto; margin-right: auto; }
 
 /* ============================================
    Budget items
@@ -525,7 +752,9 @@ body.dark-mode .timeline__track { background: var(--surface-2); }
   display: flex; align-items: flex-start; gap: 10px;
   padding: 12px 14px; border-radius: var(--radius-sm);
   background: var(--warning-bg); color: var(--dark-text); font-size: 13.5px; margin-bottom: 8px;
+  border-left: 3px solid var(--warning);
 }
+.warning-item--info { border-left-color: var(--info); }
 body.dark-mode .warning-item { color: var(--text); }
 .warning-item--info { background: var(--info-bg); }
 
@@ -536,19 +765,29 @@ body.dark-mode .warning-item { color: var(--text); }
 .fab-wrap { position: fixed; right: 20px; bottom: calc(var(--bottom-nav-h) + 20px); z-index: 60; }
 .fab {
   width: 58px; height: 58px; border-radius: 50%;
-  background: var(--navy); color: #fff; border: none;
-  font-size: 28px; box-shadow: var(--shadow-lift); cursor: pointer;
+  background: linear-gradient(155deg, var(--navy), var(--navy-deep)); color: #fff; border: none;
+  font-size: 26px; box-shadow: var(--shadow-lift); cursor: pointer;
   display: flex; align-items: center; justify-content: center; line-height: 1;
+  transition: transform 0.2s var(--ease-snap), box-shadow 0.2s var(--ease);
 }
+.fab:hover { transform: scale(1.06); }
+.fab:active { transform: scale(0.94); }
 .fab-menu {
   position: absolute; bottom: 70px; right: 0;
   background: var(--surface); border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lift); overflow: hidden; min-width: 170px;
   border: 1px solid var(--border);
+  transform-origin: bottom right;
+  animation: fab-menu-in 0.18s var(--ease-snap);
+}
+@keyframes fab-menu-in {
+  from { opacity: 0; transform: scale(0.9) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 .fab-menu button {
   display: block; width: 100%; text-align: left; border: none; background: transparent;
   color: var(--text); padding: 13px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s var(--ease);
 }
 .fab-menu button:hover { background: var(--pale-blue); }
 body.dark-mode .fab-menu button:hover { background: var(--surface-2); }
@@ -567,15 +806,24 @@ body.dark-mode .fab-menu button:hover { background: var(--surface-2); }
     position: fixed; left: 0; right: 0; bottom: 0; height: var(--bottom-nav-h);
     background: var(--surface); border-top: 1px solid var(--border);
     z-index: 60; padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -6px 18px rgba(23, 43, 77, 0.05);
   }
   .bottom-nav__link {
     flex: 1; border: none; background: transparent; color: var(--text-muted);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 2px; font-size: 10.5px; cursor: pointer; padding: 6px 0;
+    position: relative;
+    transition: color 0.18s var(--ease);
   }
-  .bottom-nav__link span { font-size: 19px; }
+  .bottom-nav__link span { font-size: 19px; transition: transform 0.18s var(--ease-snap); }
   .bottom-nav__link[aria-current="page"] { color: var(--navy); }
+  .bottom-nav__link[aria-current="page"] span { transform: translateY(-2px); }
+  .bottom-nav__link[aria-current="page"]::before {
+    content: ''; position: absolute; top: 2px; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--navy);
+  }
   body.dark-mode .bottom-nav__link[aria-current="page"] { color: var(--baby-blue); }
+  body.dark-mode .bottom-nav__link[aria-current="page"]::before { background: var(--baby-blue); }
   .fab-wrap { bottom: calc(var(--bottom-nav-h) + 16px); }
 }
 
@@ -602,41 +850,65 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 </head>
 <body>
 
+<a class="skip-link" href="#page-content">Skip to main content</a>
+
+<!-- Icon sprite (referenced via <use>) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="icon-home" viewBox="0 0 24 24"><path d="M3.5 11.5 12 4l8.5 7.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v9a1 1 0 0 0 1 1H17.5a1 1 0 0 0 1-1v-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 20v-5.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V20" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-receipt" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-2.5-1.6-2.5 1.6-2.5-1.6-2.5 1.6z" stroke-linejoin="round" stroke-linecap="round"/><path d="M9 8.5h6M9 12h6M9 15.5h3.5" stroke-linecap="round"/></symbol>
+    <symbol id="icon-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="icon-cap" viewBox="0 0 24 24"><path d="M12 4 2.5 8.5 12 13l9.5-4.5z" stroke-linejoin="round" stroke-linecap="round"/><path d="M6.5 10.7v4.4c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 9v5.5" stroke-linecap="round"/></symbol>
+    <symbol id="icon-piggy" viewBox="0 0 24 24"><path d="M5 12.2c0-3 2.9-5.2 6.6-5.2.7 0 1.4-.4 1.8-1l.9-1.4 1 2h1.2v2.6l-1.6.9v2.4c0 1.2-1 2.1-2.1 2.1h-.4v1.9H9.9v-1.9H8.4c-1.9 0-3.4-1.5-3.4-3.4z" stroke-linejoin="round" stroke-linecap="round"/><circle cx="9.3" cy="11.8" r="0.6" fill="currentColor" stroke="none"/><path d="M2.7 11.3 5 12.2" stroke-linecap="round"/></symbol>
+    <symbol id="icon-chart" viewBox="0 0 24 24"><path d="M3 21h18" stroke-linecap="round"/><rect x="5" y="11" width="3.2" height="8" rx="0.8"/><rect x="10.4" y="6.5" width="3.2" height="12.5" rx="0.8"/><rect x="15.8" y="14" width="3.2" height="5" rx="0.8"/></symbol>
+    <symbol id="icon-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M4.4 4.4l2.1 2.1M17.5 17.5l2.1 2.1M2.5 12h3M18.5 12h3M4.4 19.6l2.1-2.1M17.5 6.5l2.1-2.1" stroke-linecap="round"/></symbol>
+    <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" stroke-linecap="round"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></symbol>
+    <symbol id="icon-minus" viewBox="0 0 24 24"><path d="M5 12h14" stroke-linecap="round"/></symbol>
+    <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M12 3.5 21.5 20h-19z" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 9.5v5" stroke-linecap="round"/><circle cx="12" cy="17.3" r="0.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="icon-repeat" viewBox="0 0 24 24"><path d="M4.5 11.5v-2a4 4 0 0 1 4-4h9M20 4.5v4h-4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.5 12.5v2a4 4 0 0 1-4 4h-9M4 19.5v-4h4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
 <div id="app">
+
+  <!-- Decorative backdrop (purely visual, aria-hidden) -->
+  <div class="ambient-glow" aria-hidden="true"></div>
 
   <!-- Desktop / tablet sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar__brand">
-      <span class="sidebar__coin">🪙</span>
+      <span class="sidebar__coin" aria-hidden="true">🪙</span>
       <span class="sidebar__name">Duit Kira</span>
     </div>
 
     <nav class="sidebar__nav" id="sidebar-nav" aria-label="Main navigation">
       <button class="navlink" data-page="dashboard" aria-current="page">
-        <span class="navlink__icon">🏠</span><span>Dashboard</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-home"/></svg><span>Dashboard</span>
       </button>
       <button class="navlink" data-page="transactions">
-        <span class="navlink__icon">🧾</span><span>Transactions</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-receipt"/></svg><span>Transactions</span>
       </button>
       <button class="navlink" data-page="budget">
-        <span class="navlink__icon">🎯</span><span>Budget</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-target"/></svg><span>Budget</span>
       </button>
       <button class="navlink" data-page="ptptn">
-        <span class="navlink__icon">🎓</span><span>PTPTN</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-cap"/></svg><span>PTPTN</span>
       </button>
       <button class="navlink" data-page="savings">
-        <span class="navlink__icon">🐷</span><span>Savings</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-piggy"/></svg><span>Savings</span>
       </button>
       <button class="navlink" data-page="analytics">
-        <span class="navlink__icon">📊</span><span>Analytics</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-chart"/></svg><span>Analytics</span>
       </button>
       <button class="navlink" data-page="settings">
-        <span class="navlink__icon">⚙️</span><span>Settings</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-gear"/></svg><span>Settings</span>
       </button>
     </nav>
 
     <button class="sidebar__darkmode" id="darkmode-toggle" type="button" aria-pressed="false">
-      <span id="darkmode-icon">🌙</span> <span id="darkmode-label">Dark mode</span>
+      <svg class="sidebar__darkmode-icon" id="darkmode-icon" aria-hidden="true"><use href="#icon-moon"/></svg> <span id="darkmode-label">Dark mode</span>
     </button>
   </aside>
 
@@ -660,28 +932,30 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   <!-- Mobile bottom nav -->
   <nav class="bottom-nav" id="bottom-nav" aria-label="Main navigation">
     <button class="bottom-nav__link" data-page="dashboard" aria-current="page">
-      <span>🏠</span><small>Home</small>
+      <svg aria-hidden="true"><use href="#icon-home"/></svg><small>Home</small>
     </button>
     <button class="bottom-nav__link" data-page="transactions">
-      <span>🧾</span><small>Txns</small>
+      <svg aria-hidden="true"><use href="#icon-receipt"/></svg><small>Txns</small>
     </button>
     <button class="bottom-nav__link" data-page="budget">
-      <span>🎯</span><small>Budget</small>
+      <svg aria-hidden="true"><use href="#icon-target"/></svg><small>Budget</small>
     </button>
     <button class="bottom-nav__link" data-page="analytics">
-      <span>📊</span><small>Stats</small>
+      <svg aria-hidden="true"><use href="#icon-chart"/></svg><small>Stats</small>
     </button>
     <button class="bottom-nav__link" data-page="settings">
-      <span>⚙️</span><small>More</small>
+      <svg aria-hidden="true"><use href="#icon-gear"/></svg><small>More</small>
     </button>
   </nav>
 
   <!-- Floating add button -->
   <div class="fab-wrap">
-    <button class="fab" id="fab-add" type="button" aria-label="Add transaction">+</button>
-    <div class="fab-menu" id="fab-menu" hidden>
-      <button type="button" data-fab-action="expense">➖ Add expense</button>
-      <button type="button" data-fab-action="income">➕ Add income</button>
+    <button class="fab" id="fab-add" type="button" aria-label="Add transaction" aria-haspopup="true" aria-expanded="false">
+      <svg aria-hidden="true"><use href="#icon-plus"/></svg>
+    </button>
+    <div class="fab-menu" id="fab-menu" hidden role="menu">
+      <button type="button" data-fab-action="expense" role="menuitem"><svg aria-hidden="true"><use href="#icon-minus"/></svg>Add expense</button>
+      <button type="button" data-fab-action="income" role="menuitem"><svg aria-hidden="true"><use href="#icon-plus"/></svg>Add income</button>
     </div>
   </div>
 
@@ -1457,13 +1731,21 @@ const App = {
     const fabMenu = document.getElementById('fab-menu');
     fab.addEventListener('click', () => {
       fabMenu.hidden = !fabMenu.hidden;
+      fab.setAttribute('aria-expanded', String(!fabMenu.hidden));
+      fab.classList.toggle('fab--open', !fabMenu.hidden);
     });
     document.addEventListener('click', (e) => {
-      if (!fab.contains(e.target) && !fabMenu.contains(e.target)) fabMenu.hidden = true;
+      if (!fab.contains(e.target) && !fabMenu.contains(e.target)) {
+        fabMenu.hidden = true;
+        fab.setAttribute('aria-expanded', 'false');
+        fab.classList.remove('fab--open');
+      }
     });
     fabMenu.querySelectorAll('[data-fab-action]').forEach((btn) => {
       btn.addEventListener('click', () => {
         fabMenu.hidden = true;
+        fab.setAttribute('aria-expanded', 'false');
+        fab.classList.remove('fab--open');
         this.openTransactionForm(btn.dataset.fabAction);
       });
     });
@@ -1472,7 +1754,8 @@ const App = {
   applyDarkMode(isDark) {
     document.body.classList.toggle('dark-mode', isDark);
     document.getElementById('darkmode-toggle').setAttribute('aria-pressed', String(isDark));
-    document.getElementById('darkmode-icon').textContent = isDark ? '☀️' : '🌙';
+    const use = document.querySelector('#darkmode-icon use');
+    if (use) use.setAttribute('href', isDark ? '#icon-sun' : '#icon-moon');
     document.getElementById('darkmode-label').textContent = isDark ? 'Light mode' : 'Dark mode';
   },
 
@@ -1497,6 +1780,13 @@ const App = {
     this.renderCurrentPage();
     this.el.focus();
     window.scrollTo({ top: 0, behavior: 'auto' });
+  },
+
+  timeGreeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
   },
 
   renderCurrentPage() {
@@ -1537,11 +1827,27 @@ const App = {
     const avgDaily = Calc.averageDailySpending(all);
     const txCount = all.length;
 
+    const greeting = this.timeGreeting();
+
     this.el.innerHTML = `
+      <section class="hero-card" aria-label="Balance overview">
+        <div class="hero-card__decor" aria-hidden="true"></div>
+        <div class="hero-card__top">
+          <span class="hero-card__eyebrow">${greeting} · ${UI.escapeHtml(currentSemester)}</span>
+          <span class="hero-card__balance-label">Your total balance</span>
+          <span class="hero-card__balance ${balance < 0 ? 'hero-card__balance--neg' : ''}">${Calc.formatMoney(balance)}</span>
+          <div class="hero-card__pills">
+            <span class="hero-pill hero-pill--income">↑ ${Calc.formatMoney(totalIncome)} received</span>
+            <span class="hero-pill hero-pill--expense">↓ ${Calc.formatMoney(totalExpense)} spent</span>
+          </div>
+        </div>
+        <div class="hero-card__actions">
+          <button class="btn btn--primary" id="dash-add-expense"><svg aria-hidden="true"><use href="#icon-minus"/></svg>Add expense</button>
+          <button class="btn btn--hero-secondary" id="dash-add-income"><svg aria-hidden="true"><use href="#icon-plus"/></svg>Add income</button>
+        </div>
+      </section>
+
       <div class="card-grid">
-        ${this.statCard('Total balance', Calc.formatMoney(balance), balance < 0 ? 'expense' : '')}
-        ${this.statCard('Total received', Calc.formatMoney(totalIncome), 'income')}
-        ${this.statCard('Total spent', Calc.formatMoney(totalExpense), 'expense')}
         ${this.statCard('Remaining monthly budget', Calc.formatMoney(remainingMonthBudget), remainingMonthBudget < 0 ? 'expense' : '')}
         ${this.statCard("This month's spending", Calc.formatMoney(monthSpent))}
         ${this.statCard("This month's budget", Calc.formatMoney(monthBudget))}
@@ -1550,12 +1856,7 @@ const App = {
         ${this.statCard('Transactions', String(txCount))}
       </div>
 
-      <div class="btn-row">
-        <button class="btn btn--primary" id="dash-add-expense">➖ Add expense</button>
-        <button class="btn btn--secondary" id="dash-add-income">➕ Add income</button>
-      </div>
-
-      <div class="section-title"><h2>💸 Money Runway</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-cap"/></svg>Money Runway</h2></div>
       <div class="card" id="runway-card"></div>
 
       <div class="two-col" style="margin-top:20px;">
@@ -1569,10 +1870,10 @@ const App = {
         </div>
       </div>
 
-      <div class="section-title"><h2>⚠️ Smart warnings</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-alert"/></svg>Smart warnings</h2></div>
       <div id="warnings-wrap"></div>
 
-      <div class="section-title"><h2>📅 Budget progress</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-target"/></svg>Budget progress</h2></div>
       <div class="card" id="dash-budget-progress"></div>
 
       <div class="section-title">
@@ -2680,7 +2981,7 @@ const App = {
       <div class="section-title" style="margin-top:0;"><h2>Semester management</h2></div>
       <div class="card" id="semester-mgmt"></div>
 
-      <div class="section-title"><h2>🔁 Recurring expenses</h2>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-repeat"/></svg>Recurring expenses</h2>
         <button class="btn btn--primary btn--sm" id="add-recurring">+ Add recurring</button>
       </div>
       <div class="card" id="recurring-wrap"></div>
