@@ -286,6 +286,25 @@ body.dark-mode .sidebar { background: linear-gradient(175deg, #0F1B30 0%, #080D1
 }
 .semester-select select:hover { border-color: var(--soft-blue); }
 
+.topbar__darkmode {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s var(--ease), transform 0.12s var(--ease);
+}
+.topbar__darkmode svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.topbar__darkmode:hover { background: var(--pale-blue); }
+.topbar__darkmode:active { transform: scale(0.9); }
+body.dark-mode .topbar__darkmode:hover { background: var(--surface-2); }
+
 .page-content {
   padding: 24px 28px 100px;
   max-width: 1240px;
@@ -821,6 +840,7 @@ body.dark-mode .list-menu button:hover { background: #2C3D57; }
    ============================================ */
 @media (max-width: 900px) {
   .sidebar { display: none; }
+  .topbar__darkmode { display: flex; }
   .page-content { padding: 18px 16px 110px; }
   .topbar { padding: 0 16px; }
   .two-col { grid-template-columns: 1fr; }
@@ -941,6 +961,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     <header class="topbar">
       <h1 class="topbar__title" id="page-title">Dashboard</h1>
       <div class="topbar__right">
+        <button class="topbar__darkmode" id="darkmode-toggle-mobile" type="button" aria-pressed="false" aria-label="Toggle dark mode">
+          <svg aria-hidden="true"><use href="#icon-moon"/></svg>
+        </button>
         <label class="semester-select">
           <span class="semester-select__label">Semester</span>
           <select id="global-semester-select" aria-label="Current semester"></select>
@@ -1751,6 +1774,13 @@ const App = {
       this.renderCurrentPage();
     });
 
+    document.getElementById('darkmode-toggle-mobile').addEventListener('click', () => {
+      const isDark = !document.body.classList.contains('dark-mode');
+      this.applyDarkMode(isDark);
+      Store.saveSettings({ darkMode: isDark });
+      this.renderCurrentPage();
+    });
+
     document.getElementById('modal-close').addEventListener('click', () => UI.closeModal());
 
     const semSelect = document.getElementById('global-semester-select');
@@ -1786,8 +1816,11 @@ const App = {
   applyDarkMode(isDark) {
     document.body.classList.toggle('dark-mode', isDark);
     document.getElementById('darkmode-toggle').setAttribute('aria-pressed', String(isDark));
+    document.getElementById('darkmode-toggle-mobile').setAttribute('aria-pressed', String(isDark));
     const use = document.querySelector('#darkmode-icon use');
     if (use) use.setAttribute('href', isDark ? '#icon-sun' : '#icon-moon');
+    const mobileUse = document.querySelector('#darkmode-toggle-mobile use');
+    if (mobileUse) mobileUse.setAttribute('href', isDark ? '#icon-sun' : '#icon-moon');
     document.getElementById('darkmode-label').textContent = isDark ? 'Light mode' : 'Dark mode';
   },
 
