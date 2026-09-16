@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Duit Kira — Student Money Tracker</title>
-<meta name="description" content="A simple, private money tracker for Malaysian university students. Track PTPTN, budgets and daily spending — all stored on your own device." />
+<meta name="description" content="A simple, private money tracker for Malaysian university students. Track PTPTN/Scholarship money, budgets and daily spending — all stored on your own device." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,7 +52,7 @@
   --radius-xl: 26px;
 
   --sidebar-w: 232px;
-  --topbar-h: 68px;
+  --topbar-h: 76px;
   --bottom-nav-h: 64px;
 
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -854,7 +854,11 @@ body.dark-mode .list-menu button:hover { background: #2C3D57; }
   .sidebar { display: none; }
   .topbar__darkmode { display: flex; }
   .page-content { padding: 18px 16px 110px; }
-  .topbar { padding: 0 16px; }
+  .topbar {
+    --topbar-h: 92px;
+    height: calc(var(--topbar-h) + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 16px 0;
+  }
   .two-col { grid-template-columns: 1fr; }
   .bottom-nav {
     display: flex;
@@ -1150,7 +1154,7 @@ body.dark-mode .sync-badge--offline { background: var(--surface-2); }
   <div class="auth-card">
     <span class="auth-card__coin" aria-hidden="true">🪙</span>
     <h1>Duit Kira</h1>
-    <p>Sign in with Google to sync your budget, PTPTN plans and savings goals across every device.</p>
+    <p>Sign in with Google to sync your budget, PTPTN/Scholarship plans and savings goals across every device.</p>
     <button type="button" class="btn btn--primary btn--block google-btn" id="google-signin-btn">
       <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true">
         <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.87 2.7-6.62z"/>
@@ -1240,7 +1244,7 @@ const DEFAULT_EXPENSE_CATEGORIES = [
 ];
 
 const DEFAULT_INCOME_SOURCES = [
-  'PTPTN', 'Scholarship', 'Family', 'Part-time job', 'Other',
+  'PTPTN/Scholarship', 'Family', 'Part-time job', 'Other',
 ];
 
 const PAYMENT_METHODS = ['Cash', 'Debit card', 'Bank transfer', 'E-wallet'];
@@ -1309,6 +1313,14 @@ const Store = {
     // were only 4 (or fewer) semesters — keeps any custom names, just adds more slots
     if (Array.isArray(merged.semesters) && merged.semesters.length < DEFAULT_SETTINGS.semesters.length) {
       merged.semesters = merged.semesters.concat(DEFAULT_SETTINGS.semesters.slice(merged.semesters.length));
+    }
+    // migrate the old separate "PTPTN" + "Scholarship" income sources into
+    // one merged "PTPTN/Scholarship" option, for people who saved settings
+    // before they were combined
+    if (Array.isArray(merged.incomeSources) && merged.incomeSources.includes('PTPTN')) {
+      merged.incomeSources = merged.incomeSources
+        .map((s) => (s === 'PTPTN' ? 'PTPTN/Scholarship' : s))
+        .filter((s) => s !== 'Scholarship');
     }
     return merged;
   },
@@ -2261,8 +2273,11 @@ const CATEGORY_ICONS = {
   'Savings': 'icon-piggy',
 };
 const SOURCE_ICONS = {
-  'PTPTN': 'icon-cap', 'Scholarship': 'icon-award', 'Family': 'icon-family',
+  'PTPTN/Scholarship': 'icon-cap', 'Family': 'icon-family',
   'Part-time job': 'icon-briefcase', 'Other': 'icon-more',
+  // aliases so older transactions saved before PTPTN/Scholarship were merged
+  // still get a matching icon instead of the generic fallback
+  'PTPTN': 'icon-cap', 'Scholarship': 'icon-award',
 };
 
 function iconTag(iconId, cls) {
@@ -2381,7 +2396,7 @@ const App = {
   offerMigration(localBundle) {
     const count = localBundle.transactions.length;
     const body = `
-      <p>We found existing data saved on this device (${count} transaction${count === 1 ? '' : 's'}, plus budgets/goals/PTPTN records). Your account has no cloud data yet — import this device's data into your account?</p>
+      <p>We found existing data saved on this device (${count} transaction${count === 1 ? '' : 's'}, plus budgets/goals/PTPTN/Scholarship records). Your account has no cloud data yet — import this device's data into your account?</p>
       <div class="modal-actions">
         <button type="button" class="btn btn--ghost" id="migrate-skip">Skip — start fresh</button>
         <button type="button" class="btn btn--primary" id="migrate-yes">Import my data</button>
@@ -2553,7 +2568,7 @@ const App = {
     else moreBtn.removeAttribute('aria-current');
     const titles = {
       dashboard: 'Dashboard', transactions: 'Transactions', budget: 'Budget Planner',
-      ptptn: 'PTPTN Planning', savings: 'Savings Goals', analytics: 'Analytics', settings: 'Settings',
+      ptptn: 'PTPTN/Scholarship Planning', savings: 'Savings Goals', analytics: 'Analytics', settings: 'Settings',
     };
     document.getElementById('page-title').textContent = titles[page] || 'Duit Kira';
     this.renderCurrentPage();
@@ -2563,7 +2578,7 @@ const App = {
 
   openMoreMenu() {
     const items = [
-      { page: 'ptptn', icon: 'icon-cap', label: 'PTPTN Planning' },
+      { page: 'ptptn', icon: 'icon-cap', label: 'PTPTN/Scholarship Planning' },
       { page: 'savings', icon: 'icon-piggy', label: 'Savings Goals' },
       { page: 'settings', icon: 'icon-gear', label: 'Settings' },
     ];
@@ -3375,8 +3390,8 @@ const App = {
 
     this.el.innerHTML = `
       <div class="section-title" style="margin-top:0;">
-        <h2>Your PTPTN plans</h2>
-        <button class="btn btn--primary btn--sm" id="add-ptptn-plan">+ Add PTPTN received</button>
+        <h2>Your PTPTN/Scholarship plans</h2>
+        <button class="btn btn--primary btn--sm" id="add-ptptn-plan">+ Add money received</button>
       </div>
       <div id="ptptn-list"></div>
     `;
@@ -3384,7 +3399,7 @@ const App = {
 
     const listEl = document.getElementById('ptptn-list');
     if (plans.length === 0) {
-      listEl.appendChild(UI.emptyState('No PTPTN plans yet. Record what you received and plan how to allocate it.', 'Add PTPTN received', () => this.openPtptnForm()));
+      listEl.appendChild(UI.emptyState('No PTPTN/Scholarship plans yet. Record what you received and plan how to allocate it.', 'Add money received', () => this.openPtptnForm()));
       return;
     }
 
@@ -3433,9 +3448,9 @@ const App = {
     });
     listEl.querySelectorAll('[data-delete-ptptn]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        UI.confirm('Delete this PTPTN plan? Its allocations will also be removed.', () => {
+        UI.confirm('Delete this PTPTN/Scholarship plan? Its allocations will also be removed.', () => {
           Store.deletePtptnPlan(btn.dataset.deletePtptn);
-          UI.toast('PTPTN plan deleted', 'success');
+          UI.toast('PTPTN/Scholarship plan deleted', 'success');
           this.renderCurrentPage();
         });
       });
@@ -3468,14 +3483,14 @@ const App = {
         </div>
       </form>
     `;
-    UI.openModal(isEdit ? 'Edit PTPTN plan' : 'Add PTPTN received', body);
+    UI.openModal(isEdit ? 'Edit PTPTN/Scholarship plan' : 'Add money received', body);
 
     if (isEdit) {
       document.getElementById('ptptn-delete-btn').addEventListener('click', () => {
-        UI.confirm('Delete this PTPTN plan?', () => {
+        UI.confirm('Delete this PTPTN/Scholarship plan?', () => {
           Store.deletePtptnPlan(existing.id);
           UI.closeModal();
-          UI.toast('PTPTN plan deleted', 'success');
+          UI.toast('PTPTN/Scholarship plan deleted', 'success');
           this.renderCurrentPage();
         });
       });
@@ -3492,10 +3507,10 @@ const App = {
       };
       if (isEdit) {
         Store.updatePtptnPlan(existing.id, record);
-        UI.toast('PTPTN plan updated', 'success');
+        UI.toast('PTPTN/Scholarship plan updated', 'success');
       } else {
         Store.addPtptnPlan({ ...record, allocations: {} });
-        UI.toast('PTPTN plan added', 'success');
+        UI.toast('PTPTN/Scholarship plan added', 'success');
       }
       UI.closeModal();
       this.renderCurrentPage();
@@ -3522,7 +3537,7 @@ const App = {
         <div class="modal-actions"><button type="submit" class="btn btn--primary">Save allocation</button></div>
       </form>
     `;
-    UI.openModal('Allocate PTPTN money', body);
+    UI.openModal('Allocate PTPTN/Scholarship money', body);
 
     const form = document.getElementById('alloc-form');
     const inputs = form.querySelectorAll('[data-alloc-cat]');
@@ -3873,7 +3888,7 @@ const App = {
       document.getElementById('settings-signout-btn').addEventListener('click', () => this.confirmSignOut());
       document.getElementById('delete-cloud-data-btn').addEventListener('click', () => {
         UI.confirm(
-          'This permanently deletes ALL your data from your Google account\'s cloud storage — transactions, budgets, PTPTN plans, goals, everything. This cannot be undone.',
+          'This permanently deletes ALL your data from your Google account\'s cloud storage — transactions, budgets, PTPTN/Scholarship plans, goals, everything. This cannot be undone.',
           async () => {
             try {
               await CloudSync.deleteAllCloudData();
