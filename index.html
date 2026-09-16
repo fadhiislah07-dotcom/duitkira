@@ -901,6 +901,111 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   outline-offset: 2px;
 }
 
+/* ============================================
+   Google sign-in gate
+   ============================================ */
+#app[hidden] { display: none; }
+.auth-gate[hidden] { display: none; }
+.auth-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%);
+}
+.auth-card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 42px 32px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lift);
+}
+.auth-card__coin { display: block; font-size: 38px; margin-bottom: 12px; }
+.auth-card h1 { font-size: 25px; margin-bottom: 10px; }
+.auth-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+.auth-card__note {
+  min-height: 16px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 12px 0 0;
+}
+.auth-card__note--error { color: var(--expense); }
+
+.google-btn { background: #fff; color: #3c4043; border: 1px solid #dadce0; }
+.google-btn:hover { background: #f7f8f8; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.google-btn:active { transform: scale(0.97); }
+
+/* ============================================
+   Account chip (sidebar, Settings page, mobile More menu)
+   ============================================ */
+.account-chip { display: flex; align-items: center; gap: 10px; }
+.account-chip__avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.account-chip__avatar--fallback {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--baby-blue); color: var(--navy-deep); font-weight: 700; font-size: 14px;
+}
+.account-chip__info { min-width: 0; display: flex; flex-direction: column; }
+.account-chip__name, .account-chip__email {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;
+}
+.account-chip__name { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.account-chip__email { font-size: 11.5px; color: var(--text-muted); }
+
+.sidebar__account[hidden] { display: none; }
+.sidebar__account {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 14px;
+  margin-top: 14px;
+}
+.sidebar__account .account-chip__name { color: #fff; }
+.sidebar__account .account-chip__email { color: rgba(234, 242, 251, 0.65); }
+.account-signout {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.05); color: #EAF2FB;
+  padding: 9px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer;
+  margin-top: 10px; transition: background 0.15s var(--ease);
+}
+.account-signout:hover { background: rgba(255, 255, 255, 0.12); }
+.account-signout svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+
+.more-account {
+  display: flex; align-items: center; gap: 12px;
+  padding: 4px 4px 16px; margin-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.more-account__avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.more-account__avatar--fallback {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--baby-blue); color: var(--navy-deep); font-weight: 700; font-size: 16px;
+}
+.more-account__name { font-size: 14.5px; font-weight: 700; color: var(--text); }
+.more-account__email { font-size: 12px; color: var(--text-muted); }
+
+/* ============================================
+   Sync status badge (topbar)
+   ============================================ */
+#sync-badge[hidden] { display: none; }
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--pale-blue);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.sync-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.sync-badge--syncing { background: var(--info-bg); color: var(--info); }
+.sync-badge--synced { background: var(--income-bg); color: var(--income); }
+.sync-badge--offline { background: var(--pale-blue); color: var(--text-muted); }
+.sync-badge--error { background: var(--expense-bg); color: var(--expense); }
+body.dark-mode .sync-badge--offline { background: var(--surface-2); }
+
 </style>
 </head>
 <body>
@@ -936,6 +1041,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     <symbol id="icon-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M9 13.5 7.5 21l4.5-2.5 4.5 2.5-1.5-7.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="icon-family" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="2.6"/><circle cx="16" cy="8.5" r="2.2"/><path d="M3.5 19c0-3 2.3-5 5-5s5 2 5 5" stroke-linecap="round"/><path d="M13 19c0-2.2 1.6-4 3.7-4 2 0 3.8 1.6 3.8 4" stroke-linecap="round"/></symbol>
     <symbol id="icon-briefcase" viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="11" rx="1.5"/><path d="M8.5 8V6a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 6v2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 13h17" stroke-linecap="round"/></symbol>
+    <symbol id="icon-logout" viewBox="0 0 24 24"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16l4-4-4-4M20 12H9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-cloud" viewBox="0 0 24 24"><path d="M7 18.5a4.2 4.2 0 0 1-.7-8.34 5.5 5.5 0 0 1 10.6-2A4.5 4.5 0 0 1 17.5 18.5z" stroke-linejoin="round" stroke-linecap="round"/></symbol>
   </defs>
 </svg>
 
@@ -975,6 +1082,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
       </button>
     </nav>
 
+    <!-- Filled in by app.js only when Firebase is configured + signed in -->
+    <div class="sidebar__account" id="sidebar-account" hidden></div>
+
     <button class="sidebar__darkmode" id="darkmode-toggle" type="button" aria-pressed="false">
       <svg class="sidebar__darkmode-icon" id="darkmode-icon" aria-hidden="true"><use href="#icon-moon"/></svg> <span id="darkmode-label">Dark mode</span>
     </button>
@@ -985,6 +1095,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     <header class="topbar">
       <h1 class="topbar__title" id="page-title">Dashboard</h1>
       <div class="topbar__right">
+        <!-- Filled in by app.js only when Firebase is configured -->
+        <span class="sync-badge" id="sync-badge" hidden></span>
         <button class="topbar__darkmode" id="darkmode-toggle-mobile" type="button" aria-pressed="false" aria-label="Toggle dark mode">
           <svg aria-hidden="true"><use href="#icon-moon"/></svg>
         </button>
@@ -1032,6 +1144,26 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 </div>
 
+<!-- Sign-in gate — shown instead of #app when Firebase is configured
+     and nobody is signed in yet. Hidden entirely otherwise. -->
+<div class="auth-gate" id="auth-gate" hidden>
+  <div class="auth-card">
+    <span class="auth-card__coin" aria-hidden="true">🪙</span>
+    <h1>Duit Kira</h1>
+    <p>Sign in with Google to sync your budget, PTPTN plans and savings goals across every device.</p>
+    <button type="button" class="btn btn--primary btn--block google-btn" id="google-signin-btn">
+      <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true">
+        <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.87 2.7-6.62z"/>
+        <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.33A9 9 0 0 0 9 18z"/>
+        <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.16.28-1.7V4.97H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.03l2.99-2.33z"/>
+        <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.97l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58z"/>
+      </svg>
+      <span>Sign in with Google</span>
+    </button>
+    <p class="auth-card__note" id="auth-card-note"></p>
+  </div>
+</div>
+
 <!-- Modal -->
 <div class="modal-backdrop" id="modal-backdrop">
   <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -1047,13 +1179,49 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
+
+/* ===== js/firebase-config.js ===== */
+/* firebase-config.js
+   ============================================================
+   Fill in YOUR Firebase project's values below. Get them from:
+   Firebase Console → Project settings (gear icon) → General tab →
+   "Your apps" → the web app (</>) → SDK setup and configuration.
+
+   Until you replace every "YOUR_..." placeholder with a real value,
+   Duit Kira runs exactly as before — fully local, no login required,
+   everything stored only in this browser. Nothing breaks if you
+   never touch this file.
+
+   See README.md → "Firebase setup guide" for the full walkthrough.
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
+
 
 /* ===== js/storage.js ===== */
 /* storage.js
-   Everything related to reading/writing app data in localStorage.
-   No UI code lives here — other modules call these functions
-   and re-render themselves.
+   Everything related to reading/writing app data in localStorage,
+   plus (optionally) mirroring those writes to Firestore.
+
+   localStorage is always the source of truth for what the UI reads —
+   every read here comes straight from it, so the app works instantly
+   and fully offline. When CloudSync is enabled and signed in, each
+   mutating method below also pushes the change to Firestore; and
+   when a change arrives FROM Firestore (another device, or the
+   initial load after signing in), cloud-sync.js calls
+   Store.replaceCollection()/replaceSettingsFromCloud() to write it
+   into localStorage — those two methods intentionally do NOT push
+   back to the cloud, so it can't loop.
 */
 
 const STORAGE_KEYS = {
@@ -1115,6 +1283,18 @@ function writeJSON(key, value) {
   }
 }
 
+// Fire-and-forget cloud push helpers — no-ops whenever CloudSync
+// isn't loaded, isn't configured, or nobody is signed in.
+function cloudPush(localKey, id, data) {
+  if (typeof CloudSync !== 'undefined') CloudSync.pushDoc(localKey, id, data);
+}
+function cloudDelete(localKey, id) {
+  if (typeof CloudSync !== 'undefined') CloudSync.deleteDoc(localKey, id);
+}
+function cloudPushSettings(settings) {
+  if (typeof CloudSync !== 'undefined') CloudSync.pushSettings(settings);
+}
+
 const Store = {
   // ---------- Settings ----------
   getSettings() {
@@ -1136,7 +1316,15 @@ const Store = {
     const current = this.getSettings();
     const updated = { ...current, ...partial };
     writeJSON(STORAGE_KEYS.settings, updated);
+    cloudPushSettings(updated);
     return updated;
+  },
+  // called by CloudSync when the settings doc changes on the server —
+  // writes straight to localStorage, does NOT push back to the cloud
+  replaceSettingsFromCloud(remoteSettings) {
+    const merged = { ...DEFAULT_SETTINGS, ...remoteSettings };
+    writeJSON(STORAGE_KEYS.settings, merged);
+    return merged;
   },
 
   // ---------- Transactions ----------
@@ -1148,6 +1336,7 @@ const Store = {
     const record = { id: uid(), ...tx };
     list.push(record);
     writeJSON(STORAGE_KEYS.transactions, list);
+    cloudPush('transactions', record.id, tx);
     return record;
   },
   updateTransaction(id, patch) {
@@ -1156,11 +1345,14 @@ const Store = {
     if (idx === -1) return null;
     list[idx] = { ...list[idx], ...patch };
     writeJSON(STORAGE_KEYS.transactions, list);
+    const { id: _drop, ...data } = list[idx];
+    cloudPush('transactions', id, data);
     return list[idx];
   },
   deleteTransaction(id) {
     const list = this.getTransactions().filter((t) => t.id !== id);
     writeJSON(STORAGE_KEYS.transactions, list);
+    cloudDelete('transactions', id);
   },
 
   // ---------- Category budgets (recurring monthly per category) ----------
@@ -1171,11 +1363,24 @@ const Store = {
     const list = this.getCategoryBudgets();
     const idx = list.findIndex((b) => b.category === category);
     if (amount === null || amount === undefined || amount === '') {
-      if (idx !== -1) list.splice(idx, 1);
+      if (idx !== -1) {
+        const removedId = list[idx].id;
+        list.splice(idx, 1);
+        writeJSON(STORAGE_KEYS.categoryBudgets, list);
+        cloudDelete('categoryBudgets', removedId);
+        return list;
+      }
     } else if (idx === -1) {
-      list.push({ id: uid(), category, amount: Number(amount) });
+      const record = { id: uid(), category, amount: Number(amount) };
+      list.push(record);
+      writeJSON(STORAGE_KEYS.categoryBudgets, list);
+      cloudPush('categoryBudgets', record.id, { category: record.category, amount: record.amount });
+      return list;
     } else {
       list[idx].amount = Number(amount);
+      writeJSON(STORAGE_KEYS.categoryBudgets, list);
+      cloudPush('categoryBudgets', list[idx].id, { category: list[idx].category, amount: list[idx].amount });
+      return list;
     }
     writeJSON(STORAGE_KEYS.categoryBudgets, list);
     return list;
@@ -1190,6 +1395,8 @@ const Store = {
     const record = { id: uid(), saved: 0, ...goal };
     list.push(record);
     writeJSON(STORAGE_KEYS.goals, list);
+    const { id, ...data } = record;
+    cloudPush('goals', id, data);
     return record;
   },
   updateGoal(id, patch) {
@@ -1198,11 +1405,14 @@ const Store = {
     if (idx === -1) return null;
     list[idx] = { ...list[idx], ...patch };
     writeJSON(STORAGE_KEYS.goals, list);
+    const { id: _drop, ...data } = list[idx];
+    cloudPush('goals', id, data);
     return list[idx];
   },
   deleteGoal(id) {
     const list = this.getGoals().filter((g) => g.id !== id);
     writeJSON(STORAGE_KEYS.goals, list);
+    cloudDelete('goals', id);
   },
 
   // ---------- PTPTN plans ----------
@@ -1214,6 +1424,8 @@ const Store = {
     const record = { id: uid(), allocations: {}, ...plan };
     list.push(record);
     writeJSON(STORAGE_KEYS.ptptnPlans, list);
+    const { id, ...data } = record;
+    cloudPush('ptptnPlans', id, data);
     return record;
   },
   updatePtptnPlan(id, patch) {
@@ -1222,11 +1434,14 @@ const Store = {
     if (idx === -1) return null;
     list[idx] = { ...list[idx], ...patch };
     writeJSON(STORAGE_KEYS.ptptnPlans, list);
+    const { id: _drop, ...data } = list[idx];
+    cloudPush('ptptnPlans', id, data);
     return list[idx];
   },
   deletePtptnPlan(id) {
     const list = this.getPtptnPlans().filter((p) => p.id !== id);
     writeJSON(STORAGE_KEYS.ptptnPlans, list);
+    cloudDelete('ptptnPlans', id);
   },
 
   // ---------- Recurring expenses ----------
@@ -1238,6 +1453,8 @@ const Store = {
     const record = { id: uid(), ...item };
     list.push(record);
     writeJSON(STORAGE_KEYS.recurring, list);
+    const { id, ...data } = record;
+    cloudPush('recurring', id, data);
     return record;
   },
   updateRecurring(id, patch) {
@@ -1246,11 +1463,22 @@ const Store = {
     if (idx === -1) return null;
     list[idx] = { ...list[idx], ...patch };
     writeJSON(STORAGE_KEYS.recurring, list);
+    const { id: _drop, ...data } = list[idx];
+    cloudPush('recurring', id, data);
     return list[idx];
   },
   deleteRecurring(id) {
     const list = this.getRecurring().filter((r) => r.id !== id);
     writeJSON(STORAGE_KEYS.recurring, list);
+    cloudDelete('recurring', id);
+  },
+
+  // called by CloudSync whenever a collection changes on the server —
+  // overwrites the local cache for that collection only, does NOT push back
+  replaceCollection(localKey, items) {
+    const key = STORAGE_KEYS[localKey];
+    if (!key) return;
+    writeJSON(key, items);
   },
 
   // ---------- Bulk / data management ----------
@@ -1275,6 +1503,10 @@ const Store = {
     if (Array.isArray(data.recurring)) writeJSON(STORAGE_KEYS.recurring, data.recurring);
     if (data.settings && typeof data.settings === 'object') {
       writeJSON(STORAGE_KEYS.settings, { ...DEFAULT_SETTINGS, ...data.settings });
+    }
+    // if signed in, push the imported backup up to the cloud too
+    if (typeof CloudSync !== 'undefined' && CloudSync.enabled && CloudSync.user) {
+      CloudSync.migrateLocalToCloud(this.exportAll()).catch((e) => console.error('Import → cloud push failed', e));
     }
   },
   clearAll() {
@@ -1748,6 +1980,273 @@ const Charts = {
 };
 
 
+/* ===== js/cloud-sync.js ===== */
+/* cloud-sync.js
+   ============================================================
+   Wraps Firebase Auth (Google sign-in) + Firestore so the rest of
+   the app can stay almost untouched. Everything here is OPTIONAL:
+
+   - If js/firebase-config.js still has placeholder values, or the
+     Firebase SDK scripts didn't load, CloudSync.enabled stays false
+     and the whole app behaves exactly like the local-only version.
+   - Once configured, signing in loads/creates the user's data under
+     users/{uid}/... in Firestore and keeps it in sync in real time.
+   - localStorage is still always written to first — it's the local
+     cache the rest of the app reads from — so the UI never blocks
+     on a network round trip and still works offline.
+
+   Firestore layout (see README for the security rules that match it):
+     users/{uid}/transactions/{id}
+     users/{uid}/budgets/{id}        (category budgets)
+     users/{uid}/goals/{id}
+     users/{uid}/ptptnPlans/{id}
+     users/{uid}/recurring/{id}
+     users/{uid}/settings/main
+   ============================================================ */
+
+const COLLECTION_MAP = {
+  transactions: 'transactions',
+  categoryBudgets: 'budgets',
+  goals: 'goals',
+  ptptnPlans: 'ptptnPlans',
+  recurring: 'recurring',
+};
+
+const CloudSync = {
+  enabled: false,
+  ready: false, // true once the first auth check has resolved
+  app: null,
+  auth: null,
+  db: null,
+  user: null,
+  status: 'signed-out', // 'signed-out' | 'syncing' | 'synced' | 'offline' | 'error'
+  listeners: {},
+  _applyingRemote: false,
+
+  // callbacks the UI layer (app.js) fills in
+  onAuthChange: null,
+  onRemoteChange: null,
+  onStatusChange: null,
+
+  isConfigured() {
+    try {
+      return (
+        typeof FIREBASE_CONFIG !== 'undefined' &&
+        typeof firebase !== 'undefined' &&
+        !!FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('YOUR_') &&
+        !!FIREBASE_CONFIG.projectId && !FIREBASE_CONFIG.projectId.includes('YOUR_')
+      );
+    } catch (e) {
+      return false;
+    }
+  },
+
+  init() {
+    this.enabled = this.isConfigured();
+    if (!this.enabled) {
+      this.ready = true;
+      return false;
+    }
+    try {
+      this.app = firebase.initializeApp(FIREBASE_CONFIG);
+      this.auth = firebase.auth();
+      this.db = firebase.firestore();
+      this.db.settings({ ignoreUndefinedProperties: true });
+      try {
+        this.db.enablePersistence({ synchronizeTabs: true }).catch(() => {
+          // multiple tabs open, or browser doesn't support it — fine,
+          // sync still works, just without offline cache persistence
+        });
+      } catch (e) { /* enablePersistence not available — non-fatal */ }
+
+      window.addEventListener('online', () => {
+        if (this.user) this.setStatus('syncing');
+      });
+      window.addEventListener('offline', () => this.setStatus('offline'));
+
+      // finishes a signInWithRedirect() flow, if one was in progress
+      this.auth.getRedirectResult().catch((err) => {
+        console.error('Redirect sign-in failed', err);
+      });
+
+      this.auth.onAuthStateChanged((user) => this.handleAuthChange(user));
+    } catch (e) {
+      console.error('Firebase init failed', e);
+      this.enabled = false;
+      this.ready = true;
+    }
+    return this.enabled;
+  },
+
+  setStatus(status) {
+    this.status = status;
+    if (this.onStatusChange) this.onStatusChange(status);
+  },
+
+  handleAuthChange(user) {
+    this.user = user;
+    this.ready = true;
+    this.teardownListeners();
+    if (user) {
+      this.setStatus(navigator.onLine ? 'syncing' : 'offline');
+      // NOTE: listeners are attached later, by the caller, via attachListeners() —
+      // not here. If we attached them immediately, a first-time sign-in with an
+      // empty cloud account could overwrite the local cache with an empty
+      // snapshot before the "import your existing data?" decision is made.
+    } else {
+      this.setStatus('signed-out');
+    }
+    if (this.onAuthChange) this.onAuthChange(user);
+  },
+
+  async signIn() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+      await this.auth.signInWithPopup(provider);
+      return { ok: true };
+    } catch (err) {
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        return { ok: false, cancelled: true };
+      }
+      if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
+        try {
+          await this.auth.signInWithRedirect(provider);
+          return { ok: true, redirecting: true };
+        } catch (redirectErr) {
+          return { ok: false, error: redirectErr };
+        }
+      }
+      return { ok: false, error: err };
+    }
+  },
+
+  async signOutUser() {
+    this.teardownListeners();
+    await this.auth.signOut();
+  },
+
+  // ---------- Firestore live listeners (cloud → local cache) ----------
+  attachListeners() {
+    const uid = this.user.uid;
+    const userRef = this.db.collection('users').doc(uid);
+
+    Object.entries(COLLECTION_MAP).forEach(([localKey, remoteName]) => {
+      this.listeners[localKey] = userRef.collection(remoteName).onSnapshot(
+        (snap) => {
+          const items = [];
+          snap.forEach((doc) => items.push({ id: doc.id, ...doc.data() }));
+          this._applyingRemote = true;
+          Store.replaceCollection(localKey, items);
+          this._applyingRemote = false;
+          if (this.onRemoteChange) this.onRemoteChange(localKey);
+          this.setStatus(snap.metadata.hasPendingWrites ? 'syncing' : 'synced');
+        },
+        (err) => {
+          console.error('Firestore listener error:', remoteName, err);
+          this.setStatus('error');
+        }
+      );
+    });
+
+    this.listeners.settings = userRef.collection('settings').doc('main').onSnapshot(
+      (doc) => {
+        if (doc.exists) {
+          this._applyingRemote = true;
+          Store.replaceSettingsFromCloud(doc.data());
+          this._applyingRemote = false;
+          if (this.onRemoteChange) this.onRemoteChange('settings');
+        }
+        this.setStatus(doc.metadata && doc.metadata.hasPendingWrites ? 'syncing' : 'synced');
+      },
+      (err) => {
+        console.error('Firestore settings listener error:', err);
+        this.setStatus('error');
+      }
+    );
+  },
+
+  teardownListeners() {
+    Object.values(this.listeners).forEach((unsub) => {
+      if (typeof unsub === 'function') unsub();
+    });
+    this.listeners = {};
+  },
+
+  // ---------- local → cloud pushes (called by storage.js after a local write) ----------
+  pushDoc(localKey, id, data) {
+    if (!this.enabled || !this.user || this._applyingRemote) return;
+    const remoteName = COLLECTION_MAP[localKey];
+    if (!remoteName) return;
+    this.setStatus('syncing');
+    this.db.collection('users').doc(this.user.uid).collection(remoteName).doc(id).set(data)
+      .catch((err) => { console.error('Cloud push failed', localKey, err); this.setStatus('error'); });
+  },
+
+  deleteDoc(localKey, id) {
+    if (!this.enabled || !this.user || this._applyingRemote) return;
+    const remoteName = COLLECTION_MAP[localKey];
+    if (!remoteName) return;
+    this.setStatus('syncing');
+    this.db.collection('users').doc(this.user.uid).collection(remoteName).doc(id).delete()
+      .catch((err) => { console.error('Cloud delete failed', localKey, err); this.setStatus('error'); });
+  },
+
+  pushSettings(settings) {
+    if (!this.enabled || !this.user || this._applyingRemote) return;
+    this.setStatus('syncing');
+    this.db.collection('users').doc(this.user.uid).collection('settings').doc('main').set(settings, { merge: true })
+      .catch((err) => { console.error('Cloud settings push failed', err); this.setStatus('error'); });
+  },
+
+  // ---------- migration ----------
+  async cloudHasAnyData() {
+    const uid = this.user.uid;
+    const userRef = this.db.collection('users').doc(uid);
+    for (const remoteName of Object.values(COLLECTION_MAP)) {
+      const snap = await userRef.collection(remoteName).limit(1).get();
+      if (!snap.empty) return true;
+    }
+    const settingsDoc = await userRef.collection('settings').doc('main').get();
+    return settingsDoc.exists;
+  },
+
+  async migrateLocalToCloud(bundle) {
+    const uid = this.user.uid;
+    const userRef = this.db.collection('users').doc(uid);
+    for (const [localKey, remoteName] of Object.entries(COLLECTION_MAP)) {
+      const items = bundle[localKey] || [];
+      for (let i = 0; i < items.length; i += 400) {
+        const batch = this.db.batch();
+        items.slice(i, i + 400).forEach((item) => {
+          const { id, ...rest } = item;
+          batch.set(userRef.collection(remoteName).doc(id), rest);
+        });
+        await batch.commit();
+      }
+    }
+    if (bundle.settings) {
+      await userRef.collection('settings').doc('main').set(bundle.settings, { merge: true });
+    }
+  },
+
+  // ---------- delete all cloud data (settings page "delete cloud data") ----------
+  async deleteAllCloudData() {
+    const uid = this.user.uid;
+    const userRef = this.db.collection('users').doc(uid);
+    for (const remoteName of Object.values(COLLECTION_MAP)) {
+      const snap = await userRef.collection(remoteName).get();
+      const docs = snap.docs;
+      for (let i = 0; i < docs.length; i += 400) {
+        const batch = this.db.batch();
+        docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+      }
+    }
+    await userRef.collection('settings').doc('main').delete().catch(() => {});
+  },
+};
+
+
 /* ===== js/app.js ===== */
 /* app.js
    Application controller: routing between pages, rendering each
@@ -1785,7 +2284,190 @@ const App = {
     this.applyDarkMode(Store.getSettings().darkMode);
     this.populateSemesterSelect();
     this.bindGlobalEvents();
-    this.navigate('dashboard');
+
+    const signInBtn = document.getElementById('google-signin-btn');
+    if (signInBtn) signInBtn.addEventListener('click', () => this.handleSignInClick());
+
+    const cloudConfigured = typeof CloudSync !== 'undefined' && CloudSync.isConfigured();
+
+    if (!cloudConfigured) {
+      // Local-only mode — no Firebase config supplied yet, so Duit Kira
+      // behaves exactly like it always has. See js/firebase-config.js.
+      document.getElementById('auth-gate').hidden = true;
+      document.getElementById('app').hidden = false;
+      this.navigate('dashboard');
+      return;
+    }
+
+    // Cloud sync is configured — hide the app while we check whether this
+    // visitor is already signed in, so local data never flashes on screen
+    // before the sign-in gate.
+    document.getElementById('app').hidden = true;
+    document.getElementById('auth-gate').hidden = false;
+    const note = document.getElementById('auth-card-note');
+    if (note) note.textContent = 'Checking your session…';
+
+    CloudSync.onStatusChange = (status) => this.updateSyncBadge(status);
+    CloudSync.onRemoteChange = () => { this.populateSemesterSelect(); this.renderCurrentPage(); };
+    CloudSync.onAuthChange = (user) => this.handleAuthChange(user);
+    CloudSync.init();
+  },
+
+  // ---------------- Google sign-in / cloud sync ----------------
+  async handleSignInClick() {
+    const btn = document.getElementById('google-signin-btn');
+    const note = document.getElementById('auth-card-note');
+    btn.disabled = true;
+    note.className = 'auth-card__note';
+    note.textContent = 'Opening Google sign-in…';
+    try {
+      const result = await CloudSync.signIn();
+      if (result.cancelled) {
+        note.textContent = '';
+      } else if (result.redirecting) {
+        note.textContent = 'Redirecting to Google…';
+      } else if (!result.ok) {
+        console.error(result.error);
+        note.className = 'auth-card__note auth-card__note--error';
+        note.textContent = 'Sign-in failed — please try again.';
+      }
+    } catch (e) {
+      console.error(e);
+      note.className = 'auth-card__note auth-card__note--error';
+      note.textContent = 'Sign-in failed — please try again.';
+    }
+    btn.disabled = false;
+  },
+
+  handleAuthChange(user) {
+    const authGate = document.getElementById('auth-gate');
+    const appEl = document.getElementById('app');
+    if (user) {
+      authGate.hidden = true;
+      appEl.hidden = false;
+      this.renderAccountUI(user);
+      this.checkMigrationAndRender();
+    } else {
+      appEl.hidden = true;
+      authGate.hidden = false;
+      this.renderAccountUI(null);
+      const note = document.getElementById('auth-card-note');
+      if (note) note.textContent = '';
+    }
+  },
+
+  async checkMigrationAndRender() {
+    try {
+      const localBundle = Store.exportAll();
+      const hasLocalData = localBundle.transactions.length > 0 || localBundle.goals.length > 0 ||
+        localBundle.categoryBudgets.length > 0 || localBundle.ptptnPlans.length > 0 || localBundle.recurring.length > 0;
+      if (hasLocalData) {
+        const cloudHasData = await CloudSync.cloudHasAnyData();
+        if (!cloudHasData) {
+          this.offerMigration(localBundle);
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Migration check failed', e);
+    }
+    // No migration needed (cloud already has data, or there's nothing local
+    // to migrate) — safe to start the live listeners now.
+    CloudSync.attachListeners();
+    this.populateSemesterSelect();
+    this.navigate(this.state.page || 'dashboard');
+  },
+
+  offerMigration(localBundle) {
+    const count = localBundle.transactions.length;
+    const body = `
+      <p>We found existing data saved on this device (${count} transaction${count === 1 ? '' : 's'}, plus budgets/goals/PTPTN records). Your account has no cloud data yet — import this device's data into your account?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn--ghost" id="migrate-skip">Skip — start fresh</button>
+        <button type="button" class="btn btn--primary" id="migrate-yes">Import my data</button>
+      </div>
+    `;
+    UI.openModal('Import existing data?', body);
+    document.getElementById('migrate-skip').addEventListener('click', () => {
+      UI.closeModal();
+      // Starting fresh means the cloud (currently empty) is authoritative —
+      // attach listeners now so it takes over and clears the local cache.
+      CloudSync.attachListeners();
+      this.populateSemesterSelect();
+      this.navigate('dashboard');
+    });
+    document.getElementById('migrate-yes').addEventListener('click', async () => {
+      UI.closeModal();
+      UI.toast('Importing your data…', 'info');
+      try {
+        await CloudSync.migrateLocalToCloud(localBundle);
+        UI.toast('Import complete — synced to your account', 'success');
+      } catch (e) {
+        console.error(e);
+        UI.toast("Import failed — your local data is safe. Try again from Settings.", 'error');
+      }
+      // Attach listeners after the upload completes, so the incoming
+      // snapshot reflects what we just wrote instead of racing it.
+      CloudSync.attachListeners();
+      this.populateSemesterSelect();
+      this.navigate('dashboard');
+    });
+  },
+
+  renderAccountUI(user) {
+    const container = document.getElementById('sidebar-account');
+    if (!container) return;
+    if (!user) {
+      container.hidden = true;
+      container.innerHTML = '';
+      return;
+    }
+    container.hidden = false;
+    const initial = UI.escapeHtml((user.displayName || user.email || '?').charAt(0).toUpperCase());
+    const avatar = user.photoURL
+      ? `<img class="account-chip__avatar" src="${UI.escapeHtml(user.photoURL)}" alt="" referrerpolicy="no-referrer" />`
+      : `<span class="account-chip__avatar account-chip__avatar--fallback">${initial}</span>`;
+    container.innerHTML = `
+      <div class="account-chip">
+        ${avatar}
+        <div class="account-chip__info">
+          <span class="account-chip__name">${UI.escapeHtml(user.displayName || 'Signed in')}</span>
+          <span class="account-chip__email">${UI.escapeHtml(user.email || '')}</span>
+        </div>
+      </div>
+      <button type="button" class="account-signout" id="sidebar-signout-btn">
+        <svg aria-hidden="true"><use href="#icon-logout"/></svg><span>Sign out</span>
+      </button>
+    `;
+    document.getElementById('sidebar-signout-btn').addEventListener('click', () => this.confirmSignOut());
+  },
+
+  confirmSignOut() {
+    UI.confirm('Sign out of Duit Kira? Your data stays safely in your account.', async () => {
+      try {
+        await CloudSync.signOutUser();
+        UI.toast('Signed out', 'success');
+      } catch (e) {
+        console.error(e);
+        UI.toast('Could not sign out — try again.', 'error');
+      }
+    }, { title: 'Sign out?', confirmLabel: 'Sign out' });
+  },
+
+  updateSyncBadge(status) {
+    const badge = document.getElementById('sync-badge');
+    if (!badge) return;
+    const map = {
+      syncing: { text: 'Syncing…', cls: 'sync-badge--syncing' },
+      synced: { text: 'Synced', cls: 'sync-badge--synced' },
+      offline: { text: 'Offline', cls: 'sync-badge--offline' },
+      error: { text: 'Sync error', cls: 'sync-badge--error' },
+      'signed-out': { text: '', cls: '' },
+    };
+    const info = map[status] || map['signed-out'];
+    badge.className = `sync-badge ${info.cls}`;
+    badge.textContent = info.text;
+    badge.hidden = !info.text;
   },
 
   // ---------------- navigation ----------------
@@ -1885,7 +2567,22 @@ const App = {
       { page: 'savings', icon: 'icon-piggy', label: 'Savings Goals' },
       { page: 'settings', icon: 'icon-gear', label: 'Settings' },
     ];
+    const user = (typeof CloudSync !== 'undefined' && CloudSync.enabled) ? CloudSync.user : null;
+    const initial = user ? UI.escapeHtml((user.displayName || user.email || '?').charAt(0).toUpperCase()) : '';
+    const avatar = user && user.photoURL
+      ? `<img class="more-account__avatar" src="${UI.escapeHtml(user.photoURL)}" alt="" referrerpolicy="no-referrer" />`
+      : `<span class="more-account__avatar more-account__avatar--fallback">${initial}</span>`;
+    const accountBlock = user ? `
+      <div class="more-account">
+        ${avatar}
+        <div>
+          <div class="more-account__name">${UI.escapeHtml(user.displayName || 'Signed in')}</div>
+          <div class="more-account__email">${UI.escapeHtml(user.email || '')}</div>
+        </div>
+      </div>
+    ` : '';
     const body = `
+      ${accountBlock}
       <div class="list-menu">
         ${items.map((i) => `
           <button type="button" data-more-page="${i.page}">
@@ -1893,6 +2590,12 @@ const App = {
             <span>${UI.escapeHtml(i.label)}</span>
           </button>
         `).join('')}
+        ${user ? `
+          <button type="button" id="more-signout-btn">
+            <svg aria-hidden="true"><use href="#icon-logout"/></svg>
+            <span>Sign out</span>
+          </button>
+        ` : ''}
       </div>
     `;
     UI.openModal('More', body);
@@ -1902,6 +2605,13 @@ const App = {
         this.navigate(btn.dataset.morePage);
       });
     });
+    const signoutBtn = document.getElementById('more-signout-btn');
+    if (signoutBtn) {
+      signoutBtn.addEventListener('click', () => {
+        UI.closeModal();
+        this.confirmSignOut();
+      });
+    }
   },
 
   timeGreeting() {
@@ -3098,9 +3808,16 @@ const App = {
   renderSettings() {
     const settings = Store.getSettings();
     const recurring = Store.getRecurring();
+    const cloudOn = typeof CloudSync !== 'undefined' && CloudSync.enabled;
+    const user = cloudOn ? CloudSync.user : null;
 
     this.el.innerHTML = `
-      <div class="section-title" style="margin-top:0;"><h2>Semester management</h2></div>
+      ${cloudOn ? `
+        <div class="section-title" style="margin-top:0;"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-cloud"/></svg>Account &amp; cloud sync</h2></div>
+        <div class="card" id="account-settings-wrap"></div>
+      ` : ''}
+
+      <div class="section-title" ${cloudOn ? '' : 'style="margin-top:0;"'}><h2>Semester management</h2></div>
       <div class="card" id="semester-mgmt"></div>
 
       <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-repeat"/></svg>Recurring expenses</h2>
@@ -3115,9 +3832,11 @@ const App = {
           <button class="btn btn--secondary" id="export-csv">Export transactions (CSV)</button>
           <label class="btn btn--soft" for="import-json-input" style="cursor:pointer;">Import backup (JSON)</label>
           <input type="file" id="import-json-input" accept="application/json" hidden />
-          <button class="btn btn--danger" id="clear-all-data">Clear all data</button>
+          <button class="btn btn--danger" id="clear-all-data">${cloudOn ? 'Reset local cache' : 'Clear all data'}</button>
         </div>
-        <p class="form-hint">All your data lives only in this browser's storage — nothing is sent anywhere. Export regularly to keep a backup.</p>
+        <p class="form-hint">${cloudOn
+          ? 'Your data is synced to your Google account and cached on this device for offline use. "Reset local cache" just re-downloads it from your account — nothing is deleted. To permanently delete everything, use "Delete all cloud data" above.'
+          : "All your data lives only in this browser's storage — nothing is sent anywhere."} Export regularly to keep a backup.</p>
       </div>
 
       <div class="section-title"><h2>Preferences</h2></div>
@@ -3131,6 +3850,46 @@ const App = {
         <p class="form-hint">Category and income-source lists can be customised directly in <code>js/storage.js</code> (DEFAULT_EXPENSE_CATEGORIES / DEFAULT_INCOME_SOURCES).</p>
       </div>
     `;
+
+    if (cloudOn) {
+      const wrap = document.getElementById('account-settings-wrap');
+      const initial = UI.escapeHtml((user.displayName || user.email || '?').charAt(0).toUpperCase());
+      const avatar = user.photoURL
+        ? `<img class="account-chip__avatar" src="${UI.escapeHtml(user.photoURL)}" alt="" referrerpolicy="no-referrer" />`
+        : `<span class="account-chip__avatar account-chip__avatar--fallback">${initial}</span>`;
+      wrap.innerHTML = `
+        <div class="account-chip">
+          ${avatar}
+          <div class="account-chip__info">
+            <span class="account-chip__name">${UI.escapeHtml(user.displayName || 'Signed in')}</span>
+            <span class="account-chip__email">${UI.escapeHtml(user.email || '')}</span>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:14px;">
+          <button class="btn btn--ghost btn--sm" id="settings-signout-btn">Sign out</button>
+          <button class="btn btn--danger btn--sm" id="delete-cloud-data-btn">Delete all cloud data</button>
+        </div>
+      `;
+      document.getElementById('settings-signout-btn').addEventListener('click', () => this.confirmSignOut());
+      document.getElementById('delete-cloud-data-btn').addEventListener('click', () => {
+        UI.confirm(
+          'This permanently deletes ALL your data from your Google account\'s cloud storage — transactions, budgets, PTPTN plans, goals, everything. This cannot be undone.',
+          async () => {
+            try {
+              await CloudSync.deleteAllCloudData();
+              Store.clearAll();
+              UI.toast('Cloud data deleted', 'success');
+              this.populateSemesterSelect();
+              this.navigate('dashboard');
+            } catch (e) {
+              console.error(e);
+              UI.toast('Could not delete cloud data — try again.', 'error');
+            }
+          },
+          { title: 'Delete all cloud data?', confirmLabel: 'Delete everything' }
+        );
+      });
+    }
 
     // semester management
     const semWrap = document.getElementById('semester-mgmt');
@@ -3215,6 +3974,13 @@ const App = {
     document.getElementById('export-csv').addEventListener('click', () => this.exportCSV());
     document.getElementById('import-json-input').addEventListener('change', (e) => this.importJSON(e));
     document.getElementById('clear-all-data').addEventListener('click', () => {
+      if (cloudOn) {
+        UI.confirm('This clears the copy of your data cached on this device only. Nothing is deleted from your account — the page will reload and re-download everything from the cloud.', () => {
+          Store.clearAll();
+          location.reload();
+        }, { title: 'Reset local cache?', confirmLabel: 'Reset cache' });
+        return;
+      }
       UI.confirm('This will permanently delete ALL your transactions, budgets, goals and settings from this browser. This cannot be undone.', () => {
         Store.clearAll();
         UI.toast('All data cleared', 'success');
