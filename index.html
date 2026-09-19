@@ -1357,7 +1357,7 @@ const STORAGE_KEYS = {
 const DEFAULT_EXPENSE_CATEGORIES = [
   'Food', 'Transportation', 'Study / Academic', 'Accommodation',
   'Phone / Internet', 'Personal', 'Entertainment', 'Shopping',
-  'Health', 'Emergency', 'K-pop / Hobby', 'Other',
+  'Health', 'Emergency', 'Hobby', 'Other',
 ];
 
 const DEFAULT_INCOME_SOURCES = [
@@ -1438,6 +1438,10 @@ const Store = {
       merged.incomeSources = merged.incomeSources
         .map((s) => (s === 'PTPTN' ? 'PTPTN/Scholarship' : s))
         .filter((s) => s !== 'Scholarship');
+    }
+    // rename the old "K-pop / Hobby" expense category to just "Hobby"
+    if (Array.isArray(merged.expenseCategories) && merged.expenseCategories.includes('K-pop / Hobby')) {
+      merged.expenseCategories = merged.expenseCategories.map((c) => (c === 'K-pop / Hobby' ? 'Hobby' : c));
     }
     return merged;
   },
@@ -2386,7 +2390,8 @@ const CATEGORY_ICONS = {
   'Food': 'icon-food', 'Transportation': 'icon-transport', 'Study / Academic': 'icon-book',
   'Accommodation': 'icon-home', 'Phone / Internet': 'icon-phone', 'Personal': 'icon-user',
   'Entertainment': 'icon-film', 'Shopping': 'icon-bag', 'Health': 'icon-health',
-  'Emergency': 'icon-alert', 'K-pop / Hobby': 'icon-music', 'Other': 'icon-more',
+  'Emergency': 'icon-alert', 'Hobby': 'icon-music', 'Other': 'icon-more',
+  'K-pop / Hobby': 'icon-music',
   'Savings': 'icon-piggy',
 };
 const SOURCE_ICONS = {
