@@ -93,6 +93,7 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   transition: background 0.25s var(--ease), color 0.25s var(--ease);
+  overflow-x: hidden;
 }
 body.no-scroll { overflow: hidden; }
 
@@ -269,8 +270,16 @@ body.dark-mode .sidebar { background: linear-gradient(175deg, #0F1B30 0%, #080D1
   z-index: 5;
   border-bottom: 1px solid var(--border);
 }
-.topbar__title { font-size: 21px; letter-spacing: -0.02em; }
-.topbar__right { display: flex; align-items: center; gap: 12px; }
+.topbar__title {
+  font-size: 21px;
+  letter-spacing: -0.02em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+}
+.topbar__right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 
 .semester-select { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
 .semester-select select {
