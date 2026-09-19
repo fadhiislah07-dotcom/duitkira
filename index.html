@@ -544,6 +544,94 @@ body.dark-mode .form-field textarea {
 }
 .app-watermark a:hover { text-decoration: underline; }
 body.dark-mode .app-watermark a { color: var(--baby-blue); }
+
+/* ============================================
+   Guide (interactive help accordion)
+   ============================================ */
+.guide-intro { margin-bottom: 16px; }
+.guide-intro p { margin-bottom: 12px; }
+.guide-search {
+  border: 1.5px solid var(--border);
+  background: var(--pale-blue);
+  color: var(--text);
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14.5px;
+  font-family: inherit;
+  width: 100%;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+body.dark-mode .guide-search { background: var(--surface-2); }
+.guide-search:focus {
+  outline: none;
+  border-color: var(--soft-blue);
+  box-shadow: 0 0 0 3px rgba(111, 168, 201, 0.2);
+}
+
+.guide-list { display: flex; flex-direction: column; gap: 10px; }
+
+.guide-item {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.guide-item__summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14.5px;
+  list-style: none;
+  user-select: none;
+}
+.guide-item__summary::-webkit-details-marker { display: none; }
+.guide-item__summary:hover { background: var(--pale-blue); }
+body.dark-mode .guide-item__summary:hover { background: var(--surface-2); }
+
+.guide-item__icon {
+  width: 19px; height: 19px; flex-shrink: 0;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  color: var(--soft-blue);
+}
+body.dark-mode .guide-item__icon { color: var(--baby-blue); }
+.guide-item__title { flex: 1; }
+.guide-item__chevron {
+  width: 16px; height: 16px; flex-shrink: 0;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  color: var(--text-muted);
+  transition: transform 0.2s var(--ease);
+}
+.guide-item[open] .guide-item__chevron { transform: rotate(180deg); }
+
+.guide-item__body {
+  padding: 0 18px 18px 49px;
+  font-size: 13.5px;
+  color: var(--text);
+  animation: guide-open 0.2s var(--ease);
+}
+.guide-item__body p { margin: 0 0 10px; }
+.guide-item__body p:last-child { margin-bottom: 0; }
+.guide-item__body ul, .guide-item__body ol {
+  margin: 0 0 10px;
+  padding-left: 20px;
+}
+.guide-item__body li { margin-bottom: 6px; }
+.guide-item__body li:last-child { margin-bottom: 0; }
+.guide-item__body strong { color: var(--text); }
+@keyframes guide-open {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.guide-empty { text-align: center; padding: 20px; }
+
+@media (max-width: 560px) {
+  .guide-item__body { padding-left: 18px; }
+}
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 
 fieldset { border: none; padding: 0; margin: 0; }
@@ -1069,6 +1157,8 @@ body.dark-mode .sync-badge--offline { background: var(--surface-2); }
     <symbol id="icon-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M9 13.5 7.5 21l4.5-2.5 4.5 2.5-1.5-7.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="icon-family" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="2.6"/><circle cx="16" cy="8.5" r="2.2"/><path d="M3.5 19c0-3 2.3-5 5-5s5 2 5 5" stroke-linecap="round"/><path d="M13 19c0-2.2 1.6-4 3.7-4 2 0 3.8 1.6 3.8 4" stroke-linecap="round"/></symbol>
     <symbol id="icon-briefcase" viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="11" rx="1.5"/><path d="M8.5 8V6a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 6v2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 13h17" stroke-linecap="round"/></symbol>
+    <symbol id="icon-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.3 9.5a2.7 2.7 0 1 1 3.9 2.4c-.8.45-1.2.9-1.2 1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="M7 9.5 12 15l5-5.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="icon-logout" viewBox="0 0 24 24"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16l4-4-4-4M20 12H9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="icon-cloud" viewBox="0 0 24 24"><path d="M7 18.5a4.2 4.2 0 0 1-.7-8.34 5.5 5.5 0 0 1 10.6-2A4.5 4.5 0 0 1 17.5 18.5z" stroke-linejoin="round" stroke-linecap="round"/></symbol>
   </defs>
@@ -1107,6 +1197,9 @@ body.dark-mode .sync-badge--offline { background: var(--surface-2); }
       </button>
       <button class="navlink" data-page="settings">
         <svg class="navlink__icon" aria-hidden="true"><use href="#icon-gear"/></svg><span>Settings</span>
+      </button>
+      <button class="navlink" data-page="guide">
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-help"/></svg><span>Guide</span>
       </button>
     </nav>
 
@@ -2588,11 +2681,12 @@ const App = {
       else btn.removeAttribute('aria-current');
     });
     const moreBtn = document.getElementById('bottom-nav-more');
-    if (['ptptn', 'savings', 'settings'].includes(page)) moreBtn.setAttribute('aria-current', 'page');
+    if (['ptptn', 'savings', 'settings', 'guide'].includes(page)) moreBtn.setAttribute('aria-current', 'page');
     else moreBtn.removeAttribute('aria-current');
     const titles = {
       dashboard: 'Dashboard', transactions: 'Transactions', budget: 'Budget Planner',
       ptptn: 'PTPTN/Scholarship Planning', savings: 'Savings Goals', analytics: 'Analytics', settings: 'Settings',
+      guide: 'Guide',
     };
     document.getElementById('page-title').textContent = titles[page] || 'Duit Kira';
     this.renderCurrentPage();
@@ -2605,6 +2699,7 @@ const App = {
       { page: 'ptptn', icon: 'icon-cap', label: 'PTPTN/Scholarship Planning' },
       { page: 'savings', icon: 'icon-piggy', label: 'Savings Goals' },
       { page: 'settings', icon: 'icon-gear', label: 'Settings' },
+      { page: 'guide', icon: 'icon-help', label: 'Guide' },
     ];
     const user = (typeof CloudSync !== 'undefined' && CloudSync.enabled) ? CloudSync.user : null;
     const initial = user ? UI.escapeHtml((user.displayName || user.email || '?').charAt(0).toUpperCase()) : '';
@@ -2670,6 +2765,7 @@ const App = {
       savings: () => this.renderSavings(),
       analytics: () => this.renderAnalytics(),
       settings: () => this.renderSettings(),
+      guide: () => this.renderGuide(),
     };
     (renderers[this.state.page] || renderers.dashboard)();
   },
@@ -4034,6 +4130,152 @@ const App = {
       Store.saveSettings({ currentSemester: e.target.value });
       this.populateSemesterSelect();
       UI.toast('Current semester updated', 'success');
+    });
+  },
+
+  // ================================================================
+  // GUIDE (interactive help page)
+  // ================================================================
+  renderGuide() {
+    const sections = [
+      {
+        icon: 'icon-home', title: 'Getting started', open: true,
+        body: `
+          <p>Duit Kira tracks your income and spending as <strong>transactions</strong> — everything else (your balance, charts, budgets) is calculated automatically from them.</p>
+          <ol>
+            <li>Tap <strong>Add expense</strong> or <strong>Add income</strong> (on the Dashboard, or the <strong>+</strong> button on mobile) to log your first transaction.</li>
+            <li>Set a <strong>monthly budget</strong> on the Budget page so the app can warn you when you're close to it.</li>
+            <li>If you get PTPTN or a scholarship, record it under <strong>PTPTN/Scholarship</strong> so you can plan how to spend it.</li>
+          </ol>
+          <p>Everything is saved to this browser automatically — there's no "save" button to remember.</p>
+        `,
+      },
+      {
+        icon: 'icon-home', title: 'Dashboard',
+        body: `
+          <p>Your home screen. The dark card at the top is your <strong>total balance</strong> (all income minus all expenses, ever). Below it:</p>
+          <ul>
+            <li><strong>Money Runway</strong> — estimates whether your remaining money will last until the end of your semester, based on your average daily spending. Set your semester's start/end dates (tap "Set semester dates") to unlock this.</li>
+            <li><strong>Smart warnings</strong> — automatic alerts like "You've used 85% of your Food budget," generated from your real spending, not advice.</li>
+            <li><strong>Budget progress</strong> — a quick view of your overall and category budgets for the current month.</li>
+            <li><strong>Recent transactions</strong> — your last few entries, with a link to see everything.</li>
+          </ul>
+        `,
+      },
+      {
+        icon: 'icon-receipt', title: 'Transactions',
+        body: `
+          <p>Every income and expense you've logged, in one place.</p>
+          <ul>
+            <li>Tap the <strong>✏️</strong> icon on any row to edit it, or <strong>🗑️</strong> to delete it.</li>
+            <li>Use the search box and the type / category / month / semester filters to narrow things down.</li>
+            <li>Sort by newest, oldest, highest or lowest amount from the dropdown.</li>
+          </ul>
+          <p>Every transaction needs an amount, date, and category — payment method, semester and notes are optional extra detail.</p>
+        `,
+      },
+      {
+        icon: 'icon-target', title: 'Budget Planner',
+        body: `
+          <p>Set spending limits and see how you're tracking against them.</p>
+          <ul>
+            <li><strong>Monthly budget</strong> — your overall limit for the current month.</li>
+            <li><strong>Semester budget</strong> — a bigger-picture limit for the whole semester you're currently in.</li>
+            <li><strong>Category budgets</strong> — e.g. RM300/month for Food. Set one per category from "+ Set category budget."</li>
+          </ul>
+          <p>The progress bar changes color as you spend: blue under 50%, amber from 50–80%, orange from 80–100%, and red once you're over. Budgets are separate from income on purpose — adding money never counts as "using" your budget.</p>
+        `,
+      },
+      {
+        icon: 'icon-cap', title: 'PTPTN/Scholarship Planning',
+        body: `
+          <p>For money that arrives in one lump sum (a loan disbursement, a scholarship payout) that you want to plan out before you spend it.</p>
+          <ol>
+            <li>Tap <strong>+ Add money received</strong> and record the amount, date, and semester.</li>
+            <li>Tap <strong>Allocate</strong> to plan how much goes to each category (Food, Transport, Savings, etc.).</li>
+          </ol>
+          <p><strong>Important:</strong> allocating money here is only a plan — it does not count as spending. Your balance only changes when you log an actual expense transaction. If you want this money counted in your balance, also add it as an <strong>income</strong> transaction.</p>
+        `,
+      },
+      {
+        icon: 'icon-piggy', title: 'Savings Goals',
+        body: `
+          <p>Track progress toward something you're saving up for, separately from your day-to-day budget.</p>
+          <ol>
+            <li>Tap <strong>+ New goal</strong> and give it a name and target amount (e.g. "Emergency Fund," RM500).</li>
+            <li>Whenever you put money aside, tap <strong>+ Add money</strong> on that goal to update how much you've saved.</li>
+          </ol>
+          <p>The progress bar and percentage update automatically as you add money.</p>
+        `,
+      },
+      {
+        icon: 'icon-chart', title: 'Analytics',
+        body: `
+          <p>Charts for understanding your spending over time: monthly totals, spending by category, and income vs. expenses side by side.</p>
+          <p>Use the filters at the top to narrow the charts to a specific month, semester, or category. Your highest-spending category and month are called out automatically.</p>
+        `,
+      },
+      {
+        icon: 'icon-repeat', title: 'Recurring expenses & semesters',
+        body: `
+          <p><strong>Recurring expenses</strong> (Settings page) are for bills that repeat, like your phone plan or hostel internet. They're a reminder list — adding one doesn't automatically create transactions, since amounts often vary slightly month to month; log the actual expense yourself when it's charged.</p>
+          <p><strong>Semester management</strong> (also in Settings) lets you see each semester's totals, switch which one is "current" (the semester picker at the top of every page), and set each semester's start/end dates for the Money Runway feature.</p>
+        `,
+      },
+      {
+        icon: 'icon-cloud', title: 'Google sign-in & cloud sync',
+        body: `
+          <p>Optional. If it's been set up for this site, signing in with Google keeps the exact same data in sync across every device you sign into — add an expense on your phone, see it instantly on your laptop.</p>
+          <p>The status pill near the top shows <strong>Synced</strong>, <strong>Syncing…</strong>, <strong>Offline</strong>, or <strong>Sync error</strong>. The app keeps working from its local copy even while offline, and catches up once you're back online.</p>
+          <p>Signing in for the first time with existing data already on your device? You'll be asked whether to import it into your account or start fresh.</p>
+        `,
+      },
+      {
+        icon: 'icon-gear', title: 'Settings & backups',
+        body: `
+          <p><strong>Export data (JSON)</strong> downloads everything as a backup file — keep one occasionally even if you use cloud sync. <strong>Import backup (JSON)</strong> restores from one. <strong>Export transactions (CSV)</strong> is for opening your transactions in a spreadsheet.</p>
+          <p><strong>Dark mode</strong> can be toggled from the sidebar (desktop) or the small circular button in the top bar (mobile).</p>
+          <p>On mobile, the bottom bar's <strong>More</strong> button opens PTPTN/Scholarship, Savings, Settings and this Guide — everything that doesn't fit in the five main tabs.</p>
+        `,
+      },
+    ];
+
+    this.el.innerHTML = `
+      <div class="card guide-intro">
+        <p>Everything below is expandable — tap a topic to open it. Use the search box to jump straight to what you need.</p>
+        <input type="search" id="guide-search" class="guide-search" placeholder="Search the guide… e.g. 'budget' or 'sync'" aria-label="Search the guide" />
+      </div>
+      <div class="guide-list" id="guide-list">
+        ${sections.map((s, i) => `
+          <details class="guide-item" data-guide-index="${i}" ${s.open ? 'open' : ''}>
+            <summary class="guide-item__summary">
+              <svg class="guide-item__icon" aria-hidden="true"><use href="#${s.icon}"/></svg>
+              <span class="guide-item__title">${UI.escapeHtml(s.title)}</span>
+              <svg class="guide-item__chevron" aria-hidden="true"><use href="#icon-chevron"/></svg>
+            </summary>
+            <div class="guide-item__body">${s.body}</div>
+          </details>
+        `).join('')}
+      </div>
+      <p class="guide-empty form-hint" id="guide-no-results" hidden>No topics match your search.</p>
+    `;
+
+    const searchInput = document.getElementById('guide-search');
+    const items = [...document.querySelectorAll('.guide-item')];
+    const noResults = document.getElementById('guide-no-results');
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim().toLowerCase();
+      let visibleCount = 0;
+      items.forEach((item) => {
+        const text = item.textContent.toLowerCase();
+        const matches = !q || text.includes(q);
+        item.hidden = !matches;
+        if (matches) {
+          visibleCount++;
+          if (q) item.open = true;
+        }
+      });
+      noResults.hidden = visibleCount > 0;
     });
   },
 
