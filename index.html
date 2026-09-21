@@ -488,6 +488,39 @@ body.dark-mode .card--cream { background: var(--surface-2); }
 }
 .chart-card { min-height: 300px; }
 .chart-card__canvas-wrap { position: relative; height: 260px; margin-top: 10px; }
+.chart-card__header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.chart-card__header h3 { margin-bottom: 0; }
+.chart-table-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+.chart-table-toggle svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.chart-table-toggle:hover { background: var(--pale-blue); color: var(--text); }
+body.dark-mode .chart-table-toggle:hover { background: var(--surface-2); }
+.chart-table-toggle.is-active { background: var(--navy); color: #fff; border-color: transparent; }
+.chart-data-table-wrap { margin-top: 10px; max-height: 260px; overflow-y: auto; overflow-x: auto; }
+.chart-data-table-wrap .data-table { min-width: 0; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* ============================================
    Buttons
@@ -1103,6 +1136,9 @@ body.dark-mode .timeline__track { background: var(--surface-2); }
 .warning-item--info { border-left-color: var(--info); }
 body.dark-mode .warning-item { color: var(--text); }
 .warning-item--info { background: var(--info-bg); }
+.warning-item--positive { background: var(--income-bg); color: var(--income); border-left-color: var(--income); }
+body.dark-mode .warning-item--positive { color: var(--income); }
+.warning-item svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; flex-shrink: 0; margin-top: 1px; }
 
 /* ============================================
    Bottom nav & FAB (mobile)
@@ -3224,12 +3260,20 @@ const App = {
 
       <div class="two-col" style="margin-top:20px;">
         <div class="card chart-card">
-          <h3>Spending overview (last 6 months)</h3>
-          <div class="chart-card__canvas-wrap"><canvas id="chart-overview"></canvas></div>
+          <div class="chart-card__header">
+            <h3>Spending overview (last 6 months)</h3>
+            <button type="button" class="chart-table-toggle" data-table-target="chart-overview-table">${iconTag('icon-receipt', '')}Table</button>
+          </div>
+          <div class="chart-card__canvas-wrap" id="chart-overview-wrap"><canvas id="chart-overview"></canvas></div>
+          <div class="chart-data-table-wrap" id="chart-overview-table" hidden></div>
         </div>
         <div class="card chart-card">
-          <h3>Spending by category (this month)</h3>
-          <div class="chart-card__canvas-wrap"><canvas id="chart-category"></canvas></div>
+          <div class="chart-card__header">
+            <h3>Spending by category (this month)</h3>
+            <button type="button" class="chart-table-toggle" data-table-target="chart-category-table">${iconTag('icon-receipt', '')}Table</button>
+          </div>
+          <div class="chart-card__canvas-wrap" id="chart-category-wrap"><canvas id="chart-category"></canvas></div>
+          <div class="chart-data-table-wrap" id="chart-category-table" hidden></div>
         </div>
       </div>
 
@@ -3291,6 +3335,37 @@ const App = {
         <span class="stat-card__value ${valClass}">${value}</span>
       </div>
     `;
+  },
+
+  // ---- accessible data-table alternative for a chart ----
+  // headers: array of column labels; rows: array of arrays of cell text.
+  buildDataTable(caption, headers, rows) {
+    if (rows.length === 0) return '<p class="form-hint">No data for this chart yet.</p>';
+    return `
+      <table class="data-table chart-data-table">
+        <caption class="sr-only">${UI.escapeHtml(caption)}</caption>
+        <thead><tr>${headers.map((h) => `<th scope="col">${UI.escapeHtml(h)}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${rows.map((r) => `<tr>${r.map((c, i) => i === 0 ? `<th scope="row">${UI.escapeHtml(c)}</th>` : `<td>${UI.escapeHtml(c)}</td>`).join('')}</tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+  },
+
+  // wires a "Table" toggle button to show/hide the canvas vs. an accessible table.
+  // call this AFTER the chart + table HTML both exist in the DOM.
+  wireChartTableToggle(tableId) {
+    const toggle = document.querySelector(`[data-table-target="${tableId}"]`);
+    const tableWrap = document.getElementById(tableId);
+    const canvasWrap = document.getElementById(tableId.replace(/-table$/, '-wrap'));
+    if (!toggle || !tableWrap) return;
+    toggle.addEventListener('click', () => {
+      const showingTable = !tableWrap.hidden;
+      tableWrap.hidden = showingTable;
+      if (canvasWrap) canvasWrap.hidden = !showingTable;
+      toggle.setAttribute('aria-pressed', String(!showingTable));
+      toggle.classList.toggle('is-active', !showingTable);
+    });
   },
 
   renderRunwayCard(container, settings, all, currentSemester) {
@@ -3566,17 +3641,32 @@ const App = {
     const incomeData = months.map((m) => Calc.totalIncome(Calc.filterByMonth(all, m)));
     const expenseData = months.map((m) => Calc.totalExpense(Calc.filterByMonth(all, m)));
     Charts.spendingOverviewChart('chart-overview', labels, incomeData, expenseData);
+    document.getElementById('chart-overview-table').innerHTML = this.buildDataTable(
+      'Income and expenses by month, last 6 months',
+      ['Month', 'Income', 'Expenses'],
+      labels.map((l, i) => [l, Calc.formatMoney(incomeData[i]), Calc.formatMoney(expenseData[i])]),
+    );
+    this.wireChartTableToggle('chart-overview-table');
   },
 
   renderCategoryChartForMonth(all, monthKey) {
     const monthTx = Calc.filterByMonth(all, monthKey);
     const totals = Calc.categoryTotals(monthTx, 'expense');
     const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+    const toggleBtn = document.querySelector('[data-table-target="chart-category-table"]');
     if (entries.length === 0) {
       document.getElementById('chart-category').closest('.chart-card__canvas-wrap').innerHTML = '<p class="form-hint">No expenses recorded this month yet.</p>';
+      if (toggleBtn) toggleBtn.hidden = true;
       return;
     }
     Charts.categoryDoughnutChart('chart-category', entries.map((e) => e[0]), entries.map((e) => e[1]));
+    const total = entries.reduce((sum, [, v]) => sum + v, 0);
+    document.getElementById('chart-category-table').innerHTML = this.buildDataTable(
+      'Spending by category this month',
+      ['Category', 'Amount', '% of total'],
+      entries.map(([cat, val]) => [cat, Calc.formatMoney(val), `${Math.round((val / total) * 100)}%`]),
+    );
+    this.wireChartTableToggle('chart-category-table');
   },
 
   // ================================================================
@@ -4411,19 +4501,35 @@ const App = {
         <select id="an-filter-category"><option value="all">All categories</option>${categories.map((c) => `<option value="${UI.escapeHtml(c)}">${UI.escapeHtml(c)}</option>`).join('')}</select>
       </div>
       <div class="card-grid" id="an-stats"></div>
+
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-star"/></svg>This month's recap</h2></div>
+      <div id="an-recap-wrap"></div>
+
       <div class="two-col">
         <div class="card chart-card">
-          <h3>Monthly spending</h3>
-          <div class="chart-card__canvas-wrap"><canvas id="an-chart-monthly"></canvas></div>
+          <div class="chart-card__header">
+            <h3>Monthly spending</h3>
+            <button type="button" class="chart-table-toggle" data-table-target="an-chart-monthly-table">${iconTag('icon-receipt', '')}Table</button>
+          </div>
+          <div class="chart-card__canvas-wrap" id="an-chart-monthly-wrap"><canvas id="an-chart-monthly"></canvas></div>
+          <div class="chart-data-table-wrap" id="an-chart-monthly-table" hidden></div>
         </div>
         <div class="card chart-card">
-          <h3>Spending by category</h3>
-          <div class="chart-card__canvas-wrap"><canvas id="an-chart-category"></canvas></div>
+          <div class="chart-card__header">
+            <h3>Spending by category</h3>
+            <button type="button" class="chart-table-toggle" data-table-target="an-chart-category-table">${iconTag('icon-receipt', '')}Table</button>
+          </div>
+          <div class="chart-card__canvas-wrap" id="an-chart-category-wrap"><canvas id="an-chart-category"></canvas></div>
+          <div class="chart-data-table-wrap" id="an-chart-category-table" hidden></div>
         </div>
       </div>
       <div class="card chart-card" style="margin-top:16px;">
-        <h3>Income vs expenses</h3>
-        <div class="chart-card__canvas-wrap"><canvas id="an-chart-income-expense"></canvas></div>
+        <div class="chart-card__header">
+          <h3>Income vs expenses</h3>
+          <button type="button" class="chart-table-toggle" data-table-target="an-chart-income-expense-table">${iconTag('icon-receipt', '')}Table</button>
+        </div>
+        <div class="chart-card__canvas-wrap" id="an-chart-income-expense-wrap"><canvas id="an-chart-income-expense"></canvas></div>
+        <div class="chart-data-table-wrap" id="an-chart-income-expense-table" hidden></div>
       </div>
     `;
 
@@ -4458,29 +4564,56 @@ const App = {
     ].join('');
 
     // monthly bar chart
+    const monthlyToggle = document.querySelector('[data-table-target="an-chart-monthly-table"]');
     if (monthEntries.length === 0) {
       document.getElementById('an-chart-monthly').closest('.chart-card__canvas-wrap').innerHTML = '<p class="form-hint">No spending data for this filter yet.</p>';
+      if (monthlyToggle) monthlyToggle.hidden = true;
     } else {
       Charts.monthlyBarChart('an-chart-monthly', monthEntries.map((e) => e[0]), monthEntries.map((e) => e[1]));
+      if (monthlyToggle) monthlyToggle.hidden = false;
+      document.getElementById('an-chart-monthly-table').innerHTML = this.buildDataTable(
+        'Spending by month', ['Month', 'Amount'],
+        monthEntries.map(([m, v]) => [m, Calc.formatMoney(v)]),
+      );
+      this.wireChartTableToggle('an-chart-monthly-table');
     }
 
     // category doughnut
     const catEntries = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+    const catToggle = document.querySelector('[data-table-target="an-chart-category-table"]');
     if (catEntries.length === 0) {
       document.getElementById('an-chart-category').closest('.chart-card__canvas-wrap').innerHTML = '<p class="form-hint">No expenses recorded for this filter yet.</p>';
+      if (catToggle) catToggle.hidden = true;
     } else {
       Charts.categoryDoughnutChart('an-chart-category', catEntries.map((e) => e[0]), catEntries.map((e) => e[1]));
+      if (catToggle) catToggle.hidden = false;
+      const catTotal = catEntries.reduce((sum, [, v]) => sum + v, 0);
+      document.getElementById('an-chart-category-table').innerHTML = this.buildDataTable(
+        'Spending by category', ['Category', 'Amount', '% of total'],
+        catEntries.map(([cat, val]) => [cat, Calc.formatMoney(val), `${Math.round((val / catTotal) * 100)}%`]),
+      );
+      this.wireChartTableToggle('an-chart-category-table');
     }
 
     // income vs expense by month (last 6 available or filtered months)
     const ieMonths = monthEntries.length > 0 ? monthEntries.map((e) => e[0]) : [];
+    const ieToggle = document.querySelector('[data-table-target="an-chart-income-expense-table"]');
     if (ieMonths.length === 0) {
       document.getElementById('an-chart-income-expense').closest('.chart-card__canvas-wrap').innerHTML = '<p class="form-hint">No data for this filter yet.</p>';
+      if (ieToggle) ieToggle.hidden = true;
     } else {
       const incomeByMonth = ieMonths.map((m) => Calc.totalIncome(filtered.filter((t) => Calc.monthKey(t.date) === m)));
       const expenseByMonth = ieMonths.map((m) => Calc.totalExpense(filtered.filter((t) => Calc.monthKey(t.date) === m)));
       Charts.incomeVsExpenseChart('an-chart-income-expense', ieMonths, incomeByMonth, expenseByMonth);
+      if (ieToggle) ieToggle.hidden = false;
+      document.getElementById('an-chart-income-expense-table').innerHTML = this.buildDataTable(
+        'Income vs expenses by month', ['Month', 'Income', 'Expenses'],
+        ieMonths.map((m, i) => [m, Calc.formatMoney(incomeByMonth[i]), Calc.formatMoney(expenseByMonth[i])]),
+      );
+      this.wireChartTableToggle('an-chart-income-expense-table');
     }
+
+    this.renderMonthlyRecap(document.getElementById('an-recap-wrap'), all);
   },
 
   // update statCard signature usage with optional sub value
@@ -4725,6 +4858,83 @@ const App = {
   // ================================================================
   // GUIDE (interactive help page)
   // ================================================================
+  renderMonthlyRecap(container, all) {
+    if (!container) return;
+    const today = new Date();
+    const thisMonthKey = Calc.currentMonthKey(today);
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastMonthKey = Calc.currentMonthKey(lastMonthDate);
+
+    const thisMonthTx = Calc.filterByMonth(all, thisMonthKey);
+    const lastMonthTx = Calc.filterByMonth(all, lastMonthKey);
+    const thisSpent = Calc.totalExpense(thisMonthTx);
+    const lastSpent = Calc.totalExpense(lastMonthTx);
+    const thisIncome = Calc.totalIncome(thisMonthTx);
+
+    if (thisMonthTx.length === 0 && lastMonthTx.length === 0) {
+      container.innerHTML = `<div class="card"><p class="form-hint" style="margin:0;">Add a few transactions this month and last month to see a recap here.</p></div>`;
+      return;
+    }
+
+    const insights = [];
+
+    // overall spending trend
+    if (lastSpent > 0) {
+      const pct = Math.round(((thisSpent - lastSpent) / lastSpent) * 100);
+      if (pct <= -5) insights.push({ tone: 'positive', text: `You've spent ${Math.abs(pct)}% less this month than last (${Calc.formatMoney(thisSpent)} vs ${Calc.formatMoney(lastSpent)}).` });
+      else if (pct >= 5) insights.push({ tone: 'info', text: `You've spent ${pct}% more this month than last (${Calc.formatMoney(thisSpent)} vs ${Calc.formatMoney(lastSpent)}).` });
+      else insights.push({ tone: 'info', text: `Your spending is about the same as last month (${Calc.formatMoney(thisSpent)} vs ${Calc.formatMoney(lastSpent)}).` });
+    } else if (thisSpent > 0) {
+      insights.push({ tone: 'info', text: `You've spent ${Calc.formatMoney(thisSpent)} so far this month.` });
+    }
+
+    // biggest category this month
+    const thisCatTotals = Calc.categoryTotals(thisMonthTx, 'expense');
+    const topCat = Calc.highestCategory(thisCatTotals);
+    if (topCat && thisSpent > 0) {
+      const share = Math.round((topCat.amount / thisSpent) * 100);
+      insights.push({ tone: 'info', text: `${UI.escapeHtml(topCat.category)} is your biggest category this month — ${Calc.formatMoney(topCat.amount)} (${share}% of your spending).` });
+    }
+
+    // category with the biggest RM increase vs last month
+    const lastCatTotals = Calc.categoryTotals(lastMonthTx, 'expense');
+    let biggestIncrease = null;
+    Object.entries(thisCatTotals).forEach(([cat, amt]) => {
+      const diff = amt - (lastCatTotals[cat] || 0);
+      if (!biggestIncrease || diff > biggestIncrease.diff) biggestIncrease = { cat, diff, amt, prev: lastCatTotals[cat] || 0 };
+    });
+    if (biggestIncrease && biggestIncrease.diff > 0 && biggestIncrease.prev > 0) {
+      insights.push({ tone: 'info', text: `${UI.escapeHtml(biggestIncrease.cat)} spending is up ${Calc.formatMoney(biggestIncrease.diff)} compared to last month.` });
+    }
+
+    // savings rate
+    if (thisIncome > 0) {
+      const savingsRate = Math.round(((thisIncome - thisSpent) / thisIncome) * 100);
+      if (savingsRate >= 0) insights.push({ tone: 'positive', text: `You've kept ${savingsRate}% of what you received this month unspent so far.` });
+      else insights.push({ tone: 'info', text: `You've spent more than you've received this month (${Calc.formatMoney(thisSpent)} vs ${Calc.formatMoney(thisIncome)}).` });
+    }
+
+    // budget discipline
+    const catBudgets = Store.getCategoryBudgets();
+    if (catBudgets.length > 0) {
+      const overBudget = catBudgets.filter((b) => (thisCatTotals[b.category] || 0) > b.amount);
+      if (overBudget.length === 0) insights.push({ tone: 'positive', text: `You're within budget on all ${catBudgets.length} of your tracked categories this month. Nice.` });
+      else insights.push({ tone: 'info', text: `You're over budget on ${overBudget.length} categor${overBudget.length === 1 ? 'y' : 'ies'}: ${overBudget.map((b) => UI.escapeHtml(b.category)).join(', ')}.` });
+    }
+
+    if (insights.length === 0) {
+      container.innerHTML = `<div class="card"><p class="form-hint" style="margin:0;">Not enough data yet for a recap — check back once you've logged more transactions.</p></div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="card">${insights.map((i) => `
+      <div class="warning-item ${i.tone === 'positive' ? 'warning-item--positive' : 'warning-item--info'}">
+        ${iconTag(i.tone === 'positive' ? 'icon-check' : 'icon-chart', '')}
+        <span>${i.text}</span>
+      </div>
+    `).join('')}</div>`;
+  },
+
   renderGuide() {
     const sections = [
       {
