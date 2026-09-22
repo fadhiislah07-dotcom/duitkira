@@ -1375,6 +1375,41 @@ body.dark-mode .auth-card__coin svg { stroke: var(--baby-blue); }
 .sync-badge--error { background: var(--expense-bg); color: var(--expense); }
 body.dark-mode .sync-badge--offline { background: var(--surface-2); }
 
+/* ============================================
+   Printable semester summary
+   Hidden on screen; shown only when printing.
+   Deliberately plain black-on-white, independent of
+   light/dark mode, for ink economy and legibility.
+   ============================================ */
+#print-summary { display: none; }
+
+@media print {
+  body * { visibility: hidden; }
+  #print-summary, #print-summary * { visibility: visible; }
+  #print-summary {
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    color: #000;
+    background: #fff;
+    font-family: 'Manrope', Arial, sans-serif;
+    font-size: 12px;
+  }
+  .print-header { margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+  .print-header h1 { font-size: 20px; margin: 0 0 4px; }
+  .print-header p { margin: 0; font-size: 13px; }
+  .print-meta { color: #555; font-size: 11px; margin-top: 2px !important; }
+  .print-summary h2 { font-size: 15px; margin: 18px 0 8px; }
+  #print-summary h2 { font-size: 15px; margin: 18px 0 8px; }
+  table.print-totals { border-collapse: collapse; margin-bottom: 10px; }
+  table.print-totals th { text-align: left; font-weight: 700; padding: 4px 16px 4px 0; }
+  table.print-totals td { padding: 4px 0; text-align: right; }
+  table.print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  table.print-table th, table.print-table td { border: 1px solid #999; padding: 5px 8px; text-align: left; }
+  table.print-table th { background: #eee; }
+}
+
 </style>
 </head>
 <body>
@@ -1437,28 +1472,28 @@ body.dark-mode .sync-badge--offline { background: var(--surface-2); }
 
     <nav class="sidebar__nav" id="sidebar-nav" aria-label="Main navigation">
       <button class="navlink" data-page="dashboard" aria-current="page">
-        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-home"/></svg><span>Dashboard</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-home"/></svg><span data-i18n="nav_dashboard">Dashboard</span>
       </button>
       <button class="navlink" data-page="transactions">
-        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-receipt"/></svg><span>Transactions</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-receipt"/></svg><span data-i18n="nav_transactions">Transactions</span>
       </button>
       <button class="navlink" data-page="budget">
-        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-target"/></svg><span>Budget</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-target"/></svg><span data-i18n="nav_budget">Budget</span>
       </button>
       <button class="navlink" data-page="ptptn">
-        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-cap"/></svg><span>PTPTN</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-cap"/></svg><span data-i18n="nav_ptptn">PTPTN</span>
       </button>
       <button class="navlink" data-page="savings">
-        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-piggy"/></svg><span>Savings</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-piggy"/></svg><span data-i18n="nav_savings">Savings</span>
       </button>
       <button class="navlink" data-page="analytics">
-        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-chart"/></svg><span>Analytics</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-chart"/></svg><span data-i18n="nav_analytics">Analytics</span>
       </button>
       <button class="navlink" data-page="settings">
-        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-gear"/></svg><span>Settings</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-gear"/></svg><span data-i18n="nav_settings">Settings</span>
       </button>
       <button class="navlink" data-page="guide">
-        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-help"/></svg><span>Guide</span>
+        <svg class="navlink__icon" aria-hidden="true"><use href="#icon-help"/></svg><span data-i18n="nav_guide">Guide</span>
       </button>
     </nav>
 
@@ -1484,7 +1519,7 @@ body.dark-mode .sync-badge--offline { background: var(--surface-2); }
           <svg aria-hidden="true"><use href="#icon-moon"/></svg>
         </button>
         <label class="semester-select">
-          <span class="semester-select__label">Semester</span>
+          <span class="semester-select__label" data-i18n="field_semester">Semester</span>
           <select id="global-semester-select" aria-label="Current semester"></select>
         </label>
       </div>
@@ -1498,19 +1533,19 @@ body.dark-mode .sync-badge--offline { background: var(--surface-2); }
   <!-- Mobile bottom nav -->
   <nav class="bottom-nav" id="bottom-nav" aria-label="Main navigation">
     <button class="bottom-nav__link" data-page="dashboard" aria-current="page">
-      <svg aria-hidden="true"><use href="#icon-home"/></svg><small>Home</small>
+      <svg aria-hidden="true"><use href="#icon-home"/></svg><small data-i18n="nav_home_short">Home</small>
     </button>
     <button class="bottom-nav__link" data-page="transactions">
-      <svg aria-hidden="true"><use href="#icon-receipt"/></svg><small>Txns</small>
+      <svg aria-hidden="true"><use href="#icon-receipt"/></svg><small data-i18n="nav_txns_short">Txns</small>
     </button>
     <button class="bottom-nav__link" data-page="budget">
-      <svg aria-hidden="true"><use href="#icon-target"/></svg><small>Budget</small>
+      <svg aria-hidden="true"><use href="#icon-target"/></svg><small data-i18n="nav_budget">Budget</small>
     </button>
     <button class="bottom-nav__link" data-page="analytics">
-      <svg aria-hidden="true"><use href="#icon-chart"/></svg><small>Stats</small>
+      <svg aria-hidden="true"><use href="#icon-chart"/></svg><small data-i18n="nav_stats_short">Stats</small>
     </button>
     <button class="bottom-nav__link" id="bottom-nav-more" type="button" aria-haspopup="true">
-      <svg aria-hidden="true"><use href="#icon-more"/></svg><small>More</small>
+      <svg aria-hidden="true"><use href="#icon-more"/></svg><small data-i18n="nav_more">More</small>
     </button>
   </nav>
 
@@ -1561,6 +1596,9 @@ body.dark-mode .sync-badge--offline { background: var(--surface-2); }
 <!-- Toasts -->
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
+<!-- Populated by app.js just before window.print() — only visible via @media print -->
+<div id="print-summary" aria-hidden="true"></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
@@ -1589,6 +1627,123 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "835696666220",
   appId: "1:835696666220:web:eb6fff45c7f4c87864da49",
 };
+
+
+/* ===== js/i18n.js ===== */
+/* i18n.js
+   Small translation layer. TRANSLATIONS holds English (source of truth —
+   every key must exist here) and Bahasa Malaysia. t(key) looks up the
+   current language, falling back to English, then to the key itself so a
+   missing translation never breaks rendering — it just shows English.
+   Scope: navigation, Dashboard, Settings, and the common
+   buttons/labels/fields reused across every form. Longer prose (the Guide
+   page, dynamically-composed insight sentences) stays English for now.
+*/
+
+const TRANSLATIONS = {
+  en: {
+    // ---- navigation ----
+    nav_dashboard: 'Dashboard', nav_transactions: 'Transactions', nav_budget: 'Budget',
+    nav_ptptn: 'PTPTN', nav_savings: 'Savings', nav_analytics: 'Analytics',
+    nav_settings: 'Settings', nav_guide: 'Guide', nav_more: 'More',
+    nav_home_short: 'Home', nav_txns_short: 'Txns', nav_stats_short: 'Stats',
+
+    // ---- page titles ----
+    title_dashboard: 'Dashboard', title_transactions: 'Transactions', title_budget: 'Budget Planner',
+    title_ptptn: 'PTPTN/Scholarship Planning', title_savings: 'Savings Goals', title_analytics: 'Analytics',
+    title_settings: 'Settings', title_guide: 'Guide',
+
+    // ---- common buttons / actions ----
+    btn_save: 'Save', btn_cancel: 'Cancel', btn_delete: 'Delete', btn_edit: 'Edit',
+    btn_add: 'Add', btn_close: 'Close', btn_add_expense: 'Add expense', btn_add_income: 'Add income',
+    btn_see_all: 'See all', btn_skip: 'Skip', btn_confirm: 'Confirm',
+
+    // ---- common form field labels ----
+    field_amount: 'Amount (RM)', field_date: 'Date', field_category: 'Category',
+    field_source: 'Source', field_description: 'Description', field_payment_method: 'Payment method',
+    field_semester: 'Semester', field_notes: 'Notes',
+
+    // ---- Dashboard ----
+    dash_total_balance: 'Total balance', dash_received: 'Received', dash_spent: 'Spent',
+    dash_quick_add: 'Quick add', dash_new_template: 'New template',
+    dash_money_runway: 'Money Runway', dash_smart_warnings: 'Smart warnings',
+    dash_budget_progress: 'Budget progress', dash_recent_transactions: 'Recent transactions',
+    dash_remaining_monthly_budget: 'Remaining monthly budget', dash_this_month_spending: "This month's spending",
+    dash_this_month_budget: "This month's budget", dash_semester_balance_suffix: 'balance',
+    dash_avg_daily_spending: 'Average daily spending', dash_transactions_count: 'Transactions',
+    dash_getting_started: 'Getting started',
+    onboard_budget: 'Set your monthly budget', onboard_transaction: 'Add your first transaction',
+    onboard_semester: 'Set your semester dates',
+
+    // ---- Settings ----
+    settings_semester_management: 'Semester management', settings_recurring: 'Recurring expenses',
+    settings_install_app: 'Install as an app', settings_data_management: 'Data management',
+    settings_preferences: 'Preferences', settings_account_sync: 'Account & cloud sync',
+    settings_language: 'Language',
+
+    // ---- empty states / misc ----
+    empty_no_data: 'No data yet.', label_dark_mode: 'Dark mode', label_light_mode: 'Light mode',
+  },
+  ms: {
+    // ---- navigation ----
+    nav_dashboard: 'Papan Pemuka', nav_transactions: 'Transaksi', nav_budget: 'Bajet',
+    nav_ptptn: 'PTPTN', nav_savings: 'Simpanan', nav_analytics: 'Analitik',
+    nav_settings: 'Tetapan', nav_guide: 'Panduan', nav_more: 'Lagi',
+    nav_home_short: 'Utama', nav_txns_short: 'Transaksi', nav_stats_short: 'Statistik',
+
+    // ---- page titles ----
+    title_dashboard: 'Papan Pemuka', title_transactions: 'Transaksi', title_budget: 'Perancang Bajet',
+    title_ptptn: 'Perancangan PTPTN/Biasiswa', title_savings: 'Matlamat Simpanan', title_analytics: 'Analitik',
+    title_settings: 'Tetapan', title_guide: 'Panduan',
+
+    // ---- common buttons / actions ----
+    btn_save: 'Simpan', btn_cancel: 'Batal', btn_delete: 'Padam', btn_edit: 'Sunting',
+    btn_add: 'Tambah', btn_close: 'Tutup', btn_add_expense: 'Tambah perbelanjaan', btn_add_income: 'Tambah pendapatan',
+    btn_see_all: 'Lihat semua', btn_skip: 'Langkau', btn_confirm: 'Sahkan',
+
+    // ---- common form field labels ----
+    field_amount: 'Jumlah (RM)', field_date: 'Tarikh', field_category: 'Kategori',
+    field_source: 'Sumber', field_description: 'Keterangan', field_payment_method: 'Kaedah bayaran',
+    field_semester: 'Semester', field_notes: 'Nota',
+
+    // ---- Dashboard ----
+    dash_total_balance: 'Jumlah baki', dash_received: 'Diterima', dash_spent: 'Dibelanja',
+    dash_quick_add: 'Tambah pantas', dash_new_template: 'Templat baharu',
+    dash_money_runway: 'Jangka Hayat Wang', dash_smart_warnings: 'Amaran pintar',
+    dash_budget_progress: 'Kemajuan bajet', dash_recent_transactions: 'Transaksi terkini',
+    dash_remaining_monthly_budget: 'Baki bajet bulanan', dash_this_month_spending: 'Perbelanjaan bulan ini',
+    dash_this_month_budget: 'Bajet bulan ini', dash_semester_balance_suffix: 'baki',
+    dash_avg_daily_spending: 'Purata perbelanjaan harian', dash_transactions_count: 'Transaksi',
+    dash_getting_started: 'Bermula',
+    onboard_budget: 'Tetapkan bajet bulanan anda', onboard_transaction: 'Tambah transaksi pertama anda',
+    onboard_semester: 'Tetapkan tarikh semester anda',
+
+    // ---- Settings ----
+    settings_semester_management: 'Pengurusan semester', settings_recurring: 'Perbelanjaan berulang',
+    settings_install_app: 'Pasang sebagai aplikasi', settings_data_management: 'Pengurusan data',
+    settings_preferences: 'Keutamaan', settings_account_sync: 'Akaun & penyegerakan awan',
+    settings_language: 'Bahasa',
+
+    // ---- empty states / misc ----
+    empty_no_data: 'Tiada data lagi.', label_dark_mode: 'Mod gelap', label_light_mode: 'Mod cerah',
+  },
+};
+
+const I18N = {
+  current: 'en',
+  init(lang) {
+    this.current = (lang === 'ms') ? 'ms' : 'en';
+  },
+  setLang(lang) {
+    this.current = (lang === 'ms') ? 'ms' : 'en';
+  },
+};
+
+function t(key) {
+  return (TRANSLATIONS[I18N.current] && TRANSLATIONS[I18N.current][key])
+    || TRANSLATIONS.en[key]
+    || key;
+}
 
 
 /* ===== js/storage.js ===== */
@@ -1640,6 +1795,7 @@ const DEFAULT_SETTINGS = {
   expenseCategories: DEFAULT_EXPENSE_CATEGORIES.slice(),
   incomeSources: DEFAULT_INCOME_SOURCES.slice(),
   onboardingDismissed: false,
+  language: 'en',
 };
 
 function uid() {
@@ -2732,7 +2888,9 @@ const App = {
   init() {
     this.el = document.getElementById('page-content');
     UI.init();
+    I18N.init(Store.getSettings().language);
     this.applyDarkMode(Store.getSettings().darkMode);
+    this.applyStaticTranslations();
     this.populateSemesterSelect();
     this.bindGlobalEvents();
 
@@ -2984,7 +3142,13 @@ const App = {
     if (use) use.setAttribute('href', isDark ? '#icon-sun' : '#icon-moon');
     const mobileUse = document.querySelector('#darkmode-toggle-mobile use');
     if (mobileUse) mobileUse.setAttribute('href', isDark ? '#icon-sun' : '#icon-moon');
-    document.getElementById('darkmode-label').textContent = isDark ? 'Light mode' : 'Dark mode';
+    document.getElementById('darkmode-label').textContent = isDark ? t('label_light_mode') : t('label_dark_mode');
+  },
+
+  applyStaticTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      el.textContent = t(el.dataset.i18n);
+    });
   },
 
   populateSemesterSelect() {
@@ -3004,9 +3168,9 @@ const App = {
     if (['ptptn', 'savings', 'settings', 'guide'].includes(page)) moreBtn.setAttribute('aria-current', 'page');
     else moreBtn.removeAttribute('aria-current');
     const titles = {
-      dashboard: 'Dashboard', transactions: 'Transactions', budget: 'Budget Planner',
-      ptptn: 'PTPTN/Scholarship Planning', savings: 'Savings Goals', analytics: 'Analytics', settings: 'Settings',
-      guide: 'Guide',
+      dashboard: t('title_dashboard'), transactions: t('title_transactions'), budget: t('title_budget'),
+      ptptn: t('title_ptptn'), savings: t('title_savings'), analytics: t('title_analytics'), settings: t('title_settings'),
+      guide: t('title_guide'),
     };
     document.getElementById('page-title').textContent = titles[page] || 'Duit Kira';
     this.renderCurrentPage();
@@ -3201,9 +3365,9 @@ const App = {
     const greeting = this.timeGreeting();
 
     const onboardingSteps = [
-      { key: 'budget', label: 'Set your monthly budget', done: Calc.safeNumber(settings.monthlyBudget) > 0 },
-      { key: 'transaction', label: 'Add your first transaction', done: all.length > 0 },
-      { key: 'semester', label: 'Set your semester dates', done: !!(settings.semesterDates[currentSemester] && settings.semesterDates[currentSemester].start && settings.semesterDates[currentSemester].end) },
+      { key: 'budget', label: t('onboard_budget'), done: Calc.safeNumber(settings.monthlyBudget) > 0 },
+      { key: 'transaction', label: t('onboard_transaction'), done: all.length > 0 },
+      { key: 'semester', label: t('onboard_semester'), done: !!(settings.semesterDates[currentSemester] && settings.semesterDates[currentSemester].start && settings.semesterDates[currentSemester].end) },
     ];
     const showOnboarding = !settings.onboardingDismissed && onboardingSteps.some((s) => !s.done);
 
@@ -3211,7 +3375,7 @@ const App = {
       ${showOnboarding ? `
         <div class="card onboarding-card">
           <div class="onboarding-card__header">
-            <h2>Getting started</h2>
+            <h2>${t('dash_getting_started')}</h2>
             <button type="button" class="onboarding-card__dismiss" id="onboarding-dismiss" aria-label="Dismiss">
               <svg aria-hidden="true"><use href="#icon-minus"/></svg>
             </button>
@@ -3230,32 +3394,32 @@ const App = {
         <div class="hero-card__decor" aria-hidden="true"></div>
         <div class="hero-card__top">
           <span class="hero-card__eyebrow">${greeting} · ${UI.escapeHtml(currentSemester)}</span>
-          <span class="hero-card__balance-label">Your total balance</span>
+          <span class="hero-card__balance-label">${t('dash_total_balance')}</span>
           <span class="hero-card__balance ${balance < 0 ? 'hero-card__balance--neg' : ''}">${Calc.formatMoney(balance)}</span>
           <div class="hero-card__pills">
-            <span class="hero-pill hero-pill--income">↑ ${Calc.formatMoney(totalIncome)} received</span>
-            <span class="hero-pill hero-pill--expense">↓ ${Calc.formatMoney(totalExpense)} spent</span>
+            <span class="hero-pill hero-pill--income">↑ ${Calc.formatMoney(totalIncome)} ${t('dash_received').toLowerCase()}</span>
+            <span class="hero-pill hero-pill--expense">↓ ${Calc.formatMoney(totalExpense)} ${t('dash_spent').toLowerCase()}</span>
           </div>
         </div>
         <div class="hero-card__actions">
-          <button class="btn btn--primary" id="dash-add-expense"><svg aria-hidden="true"><use href="#icon-minus"/></svg>Add expense</button>
-          <button class="btn btn--hero-secondary" id="dash-add-income"><svg aria-hidden="true"><use href="#icon-plus"/></svg>Add income</button>
+          <button class="btn btn--primary" id="dash-add-expense"><svg aria-hidden="true"><use href="#icon-minus"/></svg>${t('btn_add_expense')}</button>
+          <button class="btn btn--hero-secondary" id="dash-add-income"><svg aria-hidden="true"><use href="#icon-plus"/></svg>${t('btn_add_income')}</button>
         </div>
       </section>
 
       <div class="card-grid">
-        ${this.statCard('Remaining monthly budget', Calc.formatMoney(remainingMonthBudget), remainingMonthBudget < 0 ? 'expense' : '')}
-        ${this.statCard("This month's spending", Calc.formatMoney(monthSpent))}
-        ${this.statCard("This month's budget", Calc.formatMoney(monthBudget))}
-        ${this.statCard(`${UI.escapeHtml(currentSemester)} balance`, Calc.formatMoney(semesterBalance), semesterBalance < 0 ? 'expense' : '')}
-        ${this.statCard('Average daily spending', Calc.formatMoney(avgDaily))}
-        ${this.statCard('Transactions', String(txCount))}
+        ${this.statCard(t('dash_remaining_monthly_budget'), Calc.formatMoney(remainingMonthBudget), remainingMonthBudget < 0 ? 'expense' : '')}
+        ${this.statCard(t('dash_this_month_spending'), Calc.formatMoney(monthSpent))}
+        ${this.statCard(t('dash_this_month_budget'), Calc.formatMoney(monthBudget))}
+        ${this.statCard(`${UI.escapeHtml(currentSemester)} ${t('dash_semester_balance_suffix')}`, Calc.formatMoney(semesterBalance), semesterBalance < 0 ? 'expense' : '')}
+        ${this.statCard(t('dash_avg_daily_spending'), Calc.formatMoney(avgDaily))}
+        ${this.statCard(t('dash_transactions_count'), String(txCount))}
       </div>
 
-      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-plus"/></svg>Quick add</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-plus"/></svg>${t('dash_quick_add')}</h2></div>
       <div class="quick-add-row" id="quick-add-row"></div>
 
-      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-cap"/></svg>Money Runway</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-cap"/></svg>${t('dash_money_runway')}</h2></div>
       <div class="card" id="runway-card"></div>
 
       <div class="two-col" style="margin-top:20px;">
@@ -3277,15 +3441,15 @@ const App = {
         </div>
       </div>
 
-      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-alert"/></svg>Smart warnings</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-alert"/></svg>${t('dash_smart_warnings')}</h2></div>
       <div id="warnings-wrap"></div>
 
-      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-target"/></svg>Budget progress</h2></div>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-target"/></svg>${t('dash_budget_progress')}</h2></div>
       <div class="card" id="dash-budget-progress"></div>
 
       <div class="section-title">
-        <h2>Recent transactions</h2>
-        <button class="btn btn--ghost btn--sm" id="dash-see-all">See all</button>
+        <h2>${t('dash_recent_transactions')}</h2>
+        <button class="btn btn--ghost btn--sm" id="dash-see-all">${t('btn_see_all')}</button>
       </div>
       <div class="card"><div class="tx-list" id="dash-recent-list"></div></div>
     `;
@@ -3508,20 +3672,20 @@ const App = {
     const typeInput = document.getElementById('tpl-type');
     const categorySelect = document.getElementById('tpl-category');
     const categoryLabel = document.getElementById('tpl-category-label');
-    const fillCategories = (t) => {
-      const list = t === 'income' ? settings.incomeSources : settings.expenseCategories;
-      categoryLabel.textContent = t === 'income' ? 'Source' : 'Category';
+    const fillCategories = (txType) => {
+      const list = txType === 'income' ? settings.incomeSources : settings.expenseCategories;
+      categoryLabel.textContent = txType === 'income' ? t('field_source') : t('field_category');
       categorySelect.innerHTML = list.map((c) => `<option value="${UI.escapeHtml(c)}">${UI.escapeHtml(c)}</option>`).join('');
     };
     fillCategories('expense');
 
     form.querySelectorAll('.type-toggle button').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const t = btn.dataset.type;
-        typeInput.value = t;
+        const txType = btn.dataset.type;
+        typeInput.value = txType;
         form.querySelectorAll('.type-toggle button').forEach((b) => b.classList.remove('is-active', 'type-expense', 'type-income'));
-        btn.classList.add('is-active', t === 'income' ? 'type-income' : 'type-expense');
-        fillCategories(t);
+        btn.classList.add('is-active', txType === 'income' ? 'type-income' : 'type-expense');
+        fillCategories(txType);
       });
     });
 
@@ -3852,11 +4016,11 @@ const App = {
         <input type="hidden" id="tx-type" value="${type}" />
         <div class="form-grid">
           <div class="form-field">
-            <label for="tx-amount">Amount (RM)</label>
+            <label for="tx-amount">${t('field_amount')}</label>
             <input type="number" id="tx-amount" min="0" step="0.01" inputmode="decimal" value="${data.amount !== undefined ? data.amount : ''}" required />
           </div>
           <div class="form-field">
-            <label for="tx-date">Date</label>
+            <label for="tx-date">${t('field_date')}</label>
             <input type="date" id="tx-date" value="${data.date || new Date().toISOString().slice(0, 10)}" required />
           </div>
           <div class="form-field form-field--full">
@@ -3864,23 +4028,23 @@ const App = {
             <select id="tx-category"></select>
           </div>
           <div class="form-field form-field--full">
-            <label for="tx-description">Description</label>
+            <label for="tx-description">${t('field_description')}</label>
             <input type="text" id="tx-description" placeholder="e.g. Lunch at campus café" value="${UI.escapeHtml(data.description || '')}" />
           </div>
           <div class="form-field">
-            <label for="tx-payment">Payment method</label>
+            <label for="tx-payment">${t('field_payment_method')}</label>
             <select id="tx-payment">
               ${PAYMENT_METHODS.map((p) => `<option value="${p}" ${data.paymentMethod === p ? 'selected' : ''}>${p}</option>`).join('')}
             </select>
           </div>
           <div class="form-field">
-            <label for="tx-semester">Semester</label>
+            <label for="tx-semester">${t('field_semester')}</label>
             <select id="tx-semester">
               ${settings.semesters.map((s) => `<option value="${UI.escapeHtml(s)}" ${data.semester ? (data.semester === s ? 'selected' : '') : (settings.currentSemester === s ? 'selected' : '')}>${UI.escapeHtml(s)}</option>`).join('')}
             </select>
           </div>
           <div class="form-field form-field--full">
-            <label for="tx-notes">Notes</label>
+            <label for="tx-notes">${t('field_notes')}</label>
             <textarea id="tx-notes">${UI.escapeHtml(data.notes || '')}</textarea>
           </div>
         </div>
@@ -3898,20 +4062,20 @@ const App = {
     const categorySelect = document.getElementById('tx-category');
     const categoryLabel = document.getElementById('tx-category-label');
 
-    const fillCategories = (t) => {
-      const list = t === 'income' ? settings.incomeSources : settings.expenseCategories;
-      categoryLabel.textContent = t === 'income' ? 'Source' : 'Category';
+    const fillCategories = (txType) => {
+      const list = txType === 'income' ? settings.incomeSources : settings.expenseCategories;
+      categoryLabel.textContent = txType === 'income' ? t('field_source') : t('field_category');
       categorySelect.innerHTML = list.map((c) => `<option value="${UI.escapeHtml(c)}" ${data.category === c ? 'selected' : ''}>${UI.escapeHtml(c)}</option>`).join('');
     };
     fillCategories(type);
 
     form.querySelectorAll('.type-toggle button').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const t = btn.dataset.type;
-        typeInput.value = t;
+        const txType = btn.dataset.type;
+        typeInput.value = txType;
         form.querySelectorAll('.type-toggle button').forEach((b) => b.classList.remove('is-active', 'type-expense', 'type-income'));
-        btn.classList.add('is-active', t === 'income' ? 'type-income' : 'type-expense');
-        fillCategories(t);
+        btn.classList.add('is-active', txType === 'income' ? 'type-income' : 'type-expense');
+        fillCategories(txType);
       });
     });
 
@@ -4630,19 +4794,19 @@ const App = {
 
     this.el.innerHTML = `
       ${cloudOn ? `
-        <div class="section-title" style="margin-top:0;"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-cloud"/></svg>Account &amp; cloud sync</h2></div>
+        <div class="section-title" style="margin-top:0;"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-cloud"/></svg>${t('settings_account_sync')}</h2></div>
         <div class="card" id="account-settings-wrap"></div>
       ` : ''}
 
-      <div class="section-title" ${cloudOn ? '' : 'style="margin-top:0;"'}><h2>Semester management</h2></div>
+      <div class="section-title" ${cloudOn ? '' : 'style="margin-top:0;"'}><h2>${t('settings_semester_management')}</h2></div>
       <div class="card" id="semester-mgmt"></div>
 
-      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-repeat"/></svg>Recurring expenses</h2>
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-repeat"/></svg>${t('settings_recurring')}</h2>
         <button class="btn btn--primary btn--sm" id="add-recurring">+ Add recurring</button>
       </div>
       <div class="card" id="recurring-wrap"></div>
 
-      <div class="section-title"><h2>Install as an app</h2></div>
+      <div class="section-title"><h2>${t('settings_install_app')}</h2></div>
       <div class="card">
         <p class="form-hint" style="margin-bottom:12px;">Add Duit Kira to your home screen for a full-screen, app-like experience — no browser bar, opens instantly.</p>
         <button class="btn btn--primary" id="install-app-btn" hidden>Install Duit Kira</button>
@@ -4650,7 +4814,7 @@ const App = {
         <p class="form-hint" id="generic-install-hint" style="margin-top:10px;" hidden>Look for "Install app" or "Add to Home Screen" in your browser's menu.</p>
       </div>
 
-      <div class="section-title"><h2>Data management</h2></div>
+      <div class="section-title"><h2>${t('settings_data_management')}</h2></div>
       <div class="card">
         <div class="btn-row">
           <button class="btn btn--secondary" id="export-json">Export data (JSON)</button>
@@ -4664,7 +4828,7 @@ const App = {
           : "All your data lives only in this browser's storage — nothing is sent anywhere."} Export regularly to keep a backup.</p>
       </div>
 
-      <div class="section-title"><h2>Preferences</h2></div>
+      <div class="section-title"><h2>${t('settings_preferences')}</h2></div>
       <div class="card">
         <div class="form-field">
           <label for="default-semester-select">Default / current semester</label>
@@ -4672,11 +4836,28 @@ const App = {
             ${settings.semesters.map((s) => `<option value="${UI.escapeHtml(s)}" ${settings.currentSemester === s ? 'selected' : ''}>${UI.escapeHtml(s)}</option>`).join('')}
           </select>
         </div>
+        <div class="form-field">
+          <label>${t('settings_language')}</label>
+          <div class="type-toggle" id="language-toggle">
+            <button type="button" data-lang="en" class="${settings.language !== 'ms' ? 'is-active type-income' : ''}">English</button>
+            <button type="button" data-lang="ms" class="${settings.language === 'ms' ? 'is-active type-income' : ''}">Bahasa Malaysia</button>
+          </div>
+        </div>
         <p class="form-hint">Category and income-source lists can be customised directly in <code>js/storage.js</code> (DEFAULT_EXPENSE_CATEGORIES / DEFAULT_INCOME_SOURCES).</p>
       </div>
 
       <p class="app-watermark">Created by : <a href="https://t.me/fdhislhhh" target="_blank" rel="noopener noreferrer">@fdhislhhh</a> on tg</p>
     `;
+
+    document.querySelectorAll('#language-toggle button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        Store.saveSettings({ language: btn.dataset.lang });
+        I18N.setLang(btn.dataset.lang);
+        this.applyStaticTranslations();
+        this.populateSemesterSelect();
+        this.renderCurrentPage();
+      });
+    });
 
     const isStandalone = (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
     if (!isStandalone) {
@@ -4757,6 +4938,7 @@ const App = {
             <div class="row-actions">
               <button type="button" class="btn btn--ghost btn--sm" data-set-current="${UI.escapeHtml(s)}">Set current</button>
               <button type="button" class="btn btn--ghost btn--sm" data-edit-dates="${UI.escapeHtml(s)}">Dates</button>
+              <button type="button" class="btn btn--ghost btn--sm" data-print-summary="${UI.escapeHtml(s)}">${iconTag('icon-receipt', '')}Print</button>
             </div>
           </div>
           <div class="budget-item__figures">
@@ -4777,6 +4959,9 @@ const App = {
     });
     semWrap.querySelectorAll('[data-edit-dates]').forEach((btn) => {
       btn.addEventListener('click', () => this.openSemesterDatesForm(btn.dataset.editDates));
+    });
+    semWrap.querySelectorAll('[data-print-summary]').forEach((btn) => {
+      btn.addEventListener('click', () => this.printSemesterSummary(btn.dataset.printSummary));
     });
 
     // recurring expenses
@@ -5197,6 +5382,69 @@ const App = {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     this.downloadBlob(blob, `duit-kira-backup-${new Date().toISOString().slice(0, 10)}.json`);
     UI.toast('Backup exported', 'success');
+  },
+
+  printSemesterSummary(semester) {
+    const settings = Store.getSettings();
+    const all = Store.getTransactions();
+    const tx = Calc.filterBySemester(all, semester)
+      .slice()
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+    const income = Calc.totalIncome(tx);
+    const expense = Calc.totalExpense(tx);
+    const balance = income - expense;
+    const dates = settings.semesterDates[semester];
+    const catTotals = Calc.categoryTotals(tx, 'expense');
+    const catEntries = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+
+    const container = document.getElementById('print-summary');
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="print-header">
+        <h1>Duit Kira — Semester Summary</h1>
+        <p>${UI.escapeHtml(semester)}${dates && dates.start && dates.end ? ` · ${Calc.formatDate(dates.start)} to ${Calc.formatDate(dates.end)}` : ''}</p>
+        <p class="print-meta">Generated ${new Date().toLocaleDateString('en-MY', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+      </div>
+
+      <table class="print-totals">
+        <tr><th>Total income</th><td>${Calc.formatMoney(income)}</td></tr>
+        <tr><th>Total expenses</th><td>${Calc.formatMoney(expense)}</td></tr>
+        <tr><th>Balance</th><td>${Calc.formatMoney(balance)}</td></tr>
+        <tr><th>Number of transactions</th><td>${tx.length}</td></tr>
+      </table>
+
+      ${catEntries.length > 0 ? `
+        <h2>Spending by category</h2>
+        <table class="print-table">
+          <thead><tr><th>Category</th><th>Amount</th><th>% of total</th></tr></thead>
+          <tbody>
+            ${catEntries.map(([cat, amt]) => `<tr><td>${UI.escapeHtml(cat)}</td><td>${Calc.formatMoney(amt)}</td><td>${expense > 0 ? Math.round((amt / expense) * 100) : 0}%</td></tr>`).join('')}
+          </tbody>
+        </table>
+      ` : ''}
+
+      <h2>All transactions</h2>
+      ${tx.length === 0 ? '<p>No transactions recorded for this semester.</p>' : `
+        <table class="print-table">
+          <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
+          <tbody>
+            ${tx.map((t) => `
+              <tr>
+                <td>${Calc.formatDate(t.date)}</td>
+                <td>${t.type === 'income' ? 'Income' : 'Expense'}</td>
+                <td>${UI.escapeHtml(t.category || '')}</td>
+                <td>${UI.escapeHtml(t.description || '')}</td>
+                <td>${t.type === 'income' ? '+' : '-'}${Calc.formatMoney(t.amount)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `}
+    `;
+
+    window.print();
   },
 
   exportCSV() {
