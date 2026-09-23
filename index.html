@@ -1666,6 +1666,7 @@ const TRANSLATIONS = {
     // ---- Dashboard ----
     dash_total_balance: 'Total balance', dash_received: 'Received', dash_spent: 'Spent',
     dash_quick_add: 'Quick add', dash_new_template: 'New template',
+    dash_daily_recap: "Today's recap",
     dash_money_runway: 'Money Runway', dash_smart_warnings: 'Smart warnings',
     dash_budget_progress: 'Budget progress', dash_recent_transactions: 'Recent transactions',
     dash_remaining_monthly_budget: 'Remaining monthly budget', dash_this_month_spending: "This month's spending",
@@ -1709,6 +1710,7 @@ const TRANSLATIONS = {
     // ---- Dashboard ----
     dash_total_balance: 'Jumlah baki', dash_received: 'Diterima', dash_spent: 'Dibelanja',
     dash_quick_add: 'Tambah pantas', dash_new_template: 'Templat baharu',
+    dash_daily_recap: 'Rekap hari ini',
     dash_money_runway: 'Jangka Hayat Wang', dash_smart_warnings: 'Amaran pintar',
     dash_budget_progress: 'Kemajuan bajet', dash_recent_transactions: 'Transaksi terkini',
     dash_remaining_monthly_budget: 'Baki bajet bulanan', dash_this_month_spending: 'Perbelanjaan bulan ini',
@@ -2107,6 +2109,39 @@ const Store = {
 */
 
 const Calc = {
+  // The app always reasons about "today"/"now" in Malaysia time, regardless
+  // of the device's own timezone — a student travelling abroad still sees
+  // "today" the way it is back home.
+  MY_TIMEZONE: 'Asia/Kuala_Lumpur',
+
+  // Returns a Date object whose LOCAL getters (getFullYear, getMonth,
+  // getDate, getHours, getDay, ...) report the current date/time IN
+  // MALAYSIA, no matter what timezone the browser itself is running in.
+  // Only safe for local getters — never call .toISOString()/.getTime() on
+  // the result and expect a Malaysia-correct instant; use
+  // todayMYDateString() for a plain YYYY-MM-DD string instead.
+  getMYNow() {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: this.MY_TIMEZONE,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+    }).formatToParts(new Date());
+    const map = {};
+    parts.forEach((p) => { if (p.type !== 'literal') map[p.type] = p.value; });
+    // formatToParts can report hour "24" for midnight in some engines — normalize to 0
+    const hour = Number(map.hour) % 24;
+    return new Date(Number(map.year), Number(map.month) - 1, Number(map.day), hour, Number(map.minute), Number(map.second));
+  },
+
+  // Today's date in Malaysia as 'YYYY-MM-DD', built directly from the
+  // timezone-aware parts (no Date round-trip, so no ambiguity at all).
+  todayMYDateString() {
+    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: this.MY_TIMEZONE }).formatToParts(new Date());
+    const map = {};
+    parts.forEach((p) => { if (p.type !== 'literal') map[p.type] = p.value; });
+    return `${map.year}-${map.month}-${map.day}`;
+  },
+
   safeNumber(n) {
     const v = Number(n);
     return Number.isFinite(v) ? v : 0;
@@ -2148,9 +2183,10 @@ const Calc = {
     return transactions.filter((t) => this.inSemester(t, semester));
   },
 
-  currentMonthKey(date = new Date()) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
+  currentMonthKey(date) {
+    const d = date || this.getMYNow();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
     return `${y}-${m}`;
   },
 
@@ -2161,21 +2197,23 @@ const Calc = {
     return new Date(y, m, 0).getDate();
   },
 
-  daysRemainingInMonth(monthKey, today = new Date()) {
+  daysRemainingInMonth(monthKey, today) {
+    const d = today || this.getMYNow();
     const total = this.daysInMonth(monthKey);
-    if (this.currentMonthKey(today) !== monthKey) return 0;
-    return Math.max(total - today.getDate() + 1, 0);
+    if (this.currentMonthKey(d) !== monthKey) return 0;
+    return Math.max(total - d.getDate() + 1, 0);
   },
 
-  averageDailySpending(transactions, sinceDate, today = new Date()) {
+  averageDailySpending(transactions, sinceDate, today) {
+    const d = today || this.getMYNow();
     const expenses = transactions.filter((t) => t.type === 'expense');
     if (expenses.length === 0) return 0;
-    const dates = expenses.map((t) => new Date(t.date)).filter((d) => !isNaN(d));
+    const dates = expenses.map((t) => new Date(t.date)).filter((dt) => !isNaN(dt));
     if (dates.length === 0) return 0;
     let earliest = sinceDate ? new Date(sinceDate) : new Date(Math.min(...dates));
     if (isNaN(earliest)) earliest = new Date(Math.min(...dates));
     const msPerDay = 1000 * 60 * 60 * 24;
-    const daySpan = Math.max(Math.round((today - earliest) / msPerDay) + 1, 1);
+    const daySpan = Math.max(Math.round((d - earliest) / msPerDay) + 1, 1);
     const total = this.totalExpense(expenses);
     return total / daySpan;
   },
@@ -2206,7 +2244,8 @@ const Calc = {
     return Math.round((end - start) / msPerDay);
   },
 
-  moneyRunway({ semesterStart, semesterEnd, currentBalance, avgDailySpending, today = new Date() }) {
+  moneyRunway({ semesterStart, semesterEnd, currentBalance, avgDailySpending, today }) {
+    const now = today || this.getMYNow();
     const result = {
       daysRemaining: null,
       avgDailySpending: this.safeNumber(avgDailySpending),
@@ -2222,7 +2261,7 @@ const Calc = {
     if (isNaN(end) || isNaN(start)) return result;
 
     const msPerDay = 1000 * 60 * 60 * 24;
-    const daysRemaining = Math.max(Math.round((end - today) / msPerDay), 0);
+    const daysRemaining = Math.max(Math.round((end - now) / msPerDay), 0);
     result.daysRemaining = daysRemaining;
 
     const balance = this.safeNumber(currentBalance);
@@ -2289,7 +2328,7 @@ const Calc = {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
     if (isNaN(d)) return dateStr;
-    return d.toLocaleDateString('en-MY', { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('en-MY', { day: '2-digit', month: 'short', year: 'numeric', timeZone: this.MY_TIMEZONE });
   },
 };
 
@@ -3317,7 +3356,7 @@ const App = {
   },
 
   timeGreeting() {
-    const hour = new Date().getHours();
+    const hour = Calc.getMYNow().getHours();
     if (hour < 12) return 'Good morning';
     if (hour < 18) return 'Good afternoon';
     return 'Good evening';
@@ -3419,6 +3458,9 @@ const App = {
       <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-plus"/></svg>${t('dash_quick_add')}</h2></div>
       <div class="quick-add-row" id="quick-add-row"></div>
 
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-star"/></svg>${t('dash_daily_recap')}</h2></div>
+      <div id="dash-daily-recap-wrap"></div>
+
       <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-cap"/></svg>${t('dash_money_runway')}</h2></div>
       <div class="card" id="runway-card"></div>
 
@@ -3475,6 +3517,7 @@ const App = {
 
     this.renderRunwayCard(document.getElementById('runway-card'), settings, all, currentSemester);
     this.renderQuickAddRow(document.getElementById('quick-add-row'));
+    this.renderDailyRecap(document.getElementById('dash-daily-recap-wrap'), all);
     this.renderWarnings(document.getElementById('warnings-wrap'), settings, all, monthKey);    this.renderDashboardBudgetProgress(document.getElementById('dash-budget-progress'), settings, all, monthKey);
 
     // recent transactions
@@ -3552,7 +3595,7 @@ const App = {
 
     const statusLabel = { 'on-track': 'On track', 'careful': 'Be careful', 'at-risk': 'At risk', 'unknown': 'Not enough data' }[runway.status];
 
-    const today = new Date();
+    const today = Calc.getMYNow();
     const start = new Date(dates.start);
     const end = new Date(dates.end);
     let pct = 50;
@@ -3618,7 +3661,7 @@ const App = {
           type: tpl.type, amount: tpl.amount, category: tpl.category,
           description: tpl.name, paymentMethod: tpl.paymentMethod || 'Cash',
           semester: Store.getSettings().currentSemester,
-          date: new Date().toISOString().slice(0, 10), notes: '',
+          date: Calc.todayMYDateString(), notes: '',
         });
         UI.toast(`${UI.escapeHtml(tpl.name)} logged`, 'success');
         this.renderCurrentPage();
@@ -3735,7 +3778,7 @@ const App = {
     }
 
     // compare to last month
-    const d = new Date();
+    const d = Calc.getMYNow();
     const lastMonthDate = new Date(d.getFullYear(), d.getMonth() - 1, 1);
     const lastMonthKey = Calc.currentMonthKey(lastMonthDate);
     const lastMonthSpent = Calc.totalExpense(Calc.filterByMonth(all, lastMonthKey));
@@ -3747,7 +3790,7 @@ const App = {
     const daysRemaining = Calc.daysRemainingInMonth(monthKey);
     const remaining = Calc.safeNumber(settings.monthlyBudget) - monthSpent;
     const suggestedLimit = Calc.dailySpendingLimit(remaining, daysRemaining);
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = Calc.todayMYDateString();
     const todaySpent = Calc.totalExpense(monthTx.filter((t) => t.date === todayStr));
     if (suggestedLimit !== null && Calc.safeNumber(settings.monthlyBudget) > 0 && todaySpent > suggestedLimit) {
       warnings.push({ icon: '⚠️', tone: 'warn', text: 'You are spending more today than your suggested daily average.' });
@@ -3793,7 +3836,7 @@ const App = {
 
   renderOverviewChart(all) {
     const months = [];
-    const d = new Date();
+    const d = Calc.getMYNow();
     for (let i = 5; i >= 0; i--) {
       const dt = new Date(d.getFullYear(), d.getMonth() - i, 1);
       months.push(Calc.currentMonthKey(dt));
@@ -4021,7 +4064,7 @@ const App = {
           </div>
           <div class="form-field">
             <label for="tx-date">${t('field_date')}</label>
-            <input type="date" id="tx-date" value="${data.date || new Date().toISOString().slice(0, 10)}" required />
+            <input type="date" id="tx-date" value="${data.date || Calc.todayMYDateString()}" required />
           </div>
           <div class="form-field form-field--full">
             <label for="tx-category" id="tx-category-label">${type === 'income' ? 'Source' : 'Category'}</label>
@@ -4391,7 +4434,7 @@ const App = {
         </div>
         <div class="form-field">
           <label for="ptptn-date">Date received</label>
-          <input type="date" id="ptptn-date" value="${existing ? existing.date : new Date().toISOString().slice(0, 10)}" required />
+          <input type="date" id="ptptn-date" value="${existing ? existing.date : Calc.todayMYDateString()}" required />
         </div>
         <div class="form-field">
           <label for="ptptn-semester">Semester</label>
@@ -4995,7 +5038,7 @@ const App = {
           if (!r) return;
           this.openTransactionForm('expense', null, {
             amount: r.amount, category: r.category, description: r.name,
-            date: new Date().toISOString().slice(0, 10),
+            date: Calc.todayMYDateString(),
           });
         });
       });
@@ -5043,9 +5086,62 @@ const App = {
   // ================================================================
   // GUIDE (interactive help page)
   // ================================================================
+  renderDailyRecap(container, all) {
+    if (!container) return;
+    const todayStr = Calc.todayMYDateString();
+    const yesterdayDate = new Date(Calc.getMYNow());
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayStr = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth() + 1).padStart(2, '0')}-${String(yesterdayDate.getDate()).padStart(2, '0')}`;
+
+    const todayTx = all.filter((t) => t.date === todayStr);
+    const yesterdayTx = all.filter((t) => t.date === yesterdayStr);
+    const todaySpent = Calc.totalExpense(todayTx);
+    const yesterdaySpent = Calc.totalExpense(yesterdayTx);
+    const avgDaily = Calc.averageDailySpending(all);
+
+    if (all.length === 0) {
+      container.innerHTML = `<div class="card"><p class="form-hint" style="margin:0;">Add a transaction to see today's recap here.</p></div>`;
+      return;
+    }
+
+    const insights = [];
+
+    if (todaySpent === 0) {
+      insights.push({ tone: 'positive', text: "No spending logged today yet — nice and quiet." });
+    } else {
+      insights.push({ tone: 'info', text: `You've spent ${Calc.formatMoney(todaySpent)} today so far.` });
+
+      if (yesterdaySpent > 0) {
+        const pct = Math.round(((todaySpent - yesterdaySpent) / yesterdaySpent) * 100);
+        if (pct <= -5) insights.push({ tone: 'positive', text: `That's ${Math.abs(pct)}% less than yesterday (${Calc.formatMoney(yesterdaySpent)}).` });
+        else if (pct >= 5) insights.push({ tone: 'info', text: `That's ${pct}% more than yesterday (${Calc.formatMoney(yesterdaySpent)}).` });
+        else insights.push({ tone: 'info', text: `That's about the same as yesterday (${Calc.formatMoney(yesterdaySpent)}).` });
+      }
+
+      if (avgDaily > 0) {
+        const diffPct = Math.round(((todaySpent - avgDaily) / avgDaily) * 100);
+        if (diffPct <= -10) insights.push({ tone: 'positive', text: `You're ${Math.abs(diffPct)}% below your usual average daily spending (${Calc.formatMoney(avgDaily)}).` });
+        else if (diffPct >= 10) insights.push({ tone: 'info', text: `You're ${diffPct}% above your usual average daily spending (${Calc.formatMoney(avgDaily)}).` });
+      }
+
+      const todayExpenseTx = todayTx.filter((t) => t.type === 'expense');
+      if (todayExpenseTx.length > 0) {
+        const biggest = todayExpenseTx.reduce((max, t) => (Calc.safeNumber(t.amount) > Calc.safeNumber(max.amount) ? t : max), todayExpenseTx[0]);
+        insights.push({ tone: 'info', text: `Your biggest expense today was ${UI.escapeHtml(biggest.description || biggest.category)} — ${Calc.formatMoney(biggest.amount)}.` });
+      }
+    }
+
+    container.innerHTML = `<div class="card">${insights.map((i) => `
+      <div class="warning-item ${i.tone === 'positive' ? 'warning-item--positive' : 'warning-item--info'}">
+        ${iconTag(i.tone === 'positive' ? 'icon-check' : 'icon-chart', '')}
+        <span>${i.text}</span>
+      </div>
+    `).join('')}</div>`;
+  },
+
   renderMonthlyRecap(container, all) {
     if (!container) return;
-    const today = new Date();
+    const today = Calc.getMYNow();
     const thisMonthKey = Calc.currentMonthKey(today);
     const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const lastMonthKey = Calc.currentMonthKey(lastMonthDate);
@@ -5327,7 +5423,7 @@ const App = {
           </div>
           <div class="form-field">
             <label for="rec-start">Start date</label>
-            <input type="date" id="rec-start" value="${existing ? existing.startDate : new Date().toISOString().slice(0, 10)}" required />
+            <input type="date" id="rec-start" value="${existing ? existing.startDate : Calc.todayMYDateString()}" required />
           </div>
           <div class="form-field">
             <label for="rec-end">End date (optional)</label>
@@ -5380,7 +5476,7 @@ const App = {
   exportJSON() {
     const data = Store.exportAll();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    this.downloadBlob(blob, `duit-kira-backup-${new Date().toISOString().slice(0, 10)}.json`);
+    this.downloadBlob(blob, `duit-kira-backup-${Calc.todayMYDateString()}.json`);
     UI.toast('Backup exported', 'success');
   },
 
@@ -5405,7 +5501,7 @@ const App = {
       <div class="print-header">
         <h1>Duit Kira — Semester Summary</h1>
         <p>${UI.escapeHtml(semester)}${dates && dates.start && dates.end ? ` · ${Calc.formatDate(dates.start)} to ${Calc.formatDate(dates.end)}` : ''}</p>
-        <p class="print-meta">Generated ${new Date().toLocaleDateString('en-MY', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+        <p class="print-meta">Generated ${new Date().toLocaleDateString('en-MY', { day: '2-digit', month: 'long', year: 'numeric', timeZone: Calc.MY_TIMEZONE })}</p>
       </div>
 
       <table class="print-totals">
@@ -5457,7 +5553,7 @@ const App = {
       .map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
       .join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
-    this.downloadBlob(blob, `duit-kira-transactions-${new Date().toISOString().slice(0, 10)}.csv`);
+    this.downloadBlob(blob, `duit-kira-transactions-${Calc.todayMYDateString()}.csv`);
     UI.toast('Transactions exported as CSV', 'success');
   },
 
