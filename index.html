@@ -3834,6 +3834,24 @@ const App = {
     `;
   },
 
+  renderLast7DaysChart(all) {
+    const days = [];
+    const base = Calc.getMYNow();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() - i);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      days.push({ dateStr, label: d.toLocaleDateString('en-MY', { weekday: 'short' }), full: d.toLocaleDateString('en-MY', { day: '2-digit', month: 'short' }) });
+    }
+    const data = days.map((d) => Calc.totalExpense(all.filter((t) => t.date === d.dateStr && t.type === 'expense')));
+    Charts.monthlyBarChart('an-chart-last7', days.map((d) => d.label), data);
+    document.getElementById('an-chart-last7-table').innerHTML = this.buildDataTable(
+      'Spending for the last 7 days',
+      ['Day', 'Amount'],
+      days.map((d, i) => [`${d.label} (${d.full})`, Calc.formatMoney(data[i])]),
+    );
+    this.wireChartTableToggle('an-chart-last7-table');
+  },
+
   renderOverviewChart(all) {
     const months = [];
     const d = Calc.getMYNow();
@@ -4709,6 +4727,17 @@ const App = {
       </div>
       <div class="card-grid" id="an-stats"></div>
 
+      <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-star"/></svg>${t('dash_daily_recap')}</h2></div>
+      <div id="an-daily-recap-wrap"></div>
+      <div class="card chart-card" style="margin-bottom:20px;">
+        <div class="chart-card__header">
+          <h3>Last 7 days</h3>
+          <button type="button" class="chart-table-toggle" data-table-target="an-chart-last7-table">${iconTag('icon-receipt', '')}Table</button>
+        </div>
+        <div class="chart-card__canvas-wrap" id="an-chart-last7-wrap"><canvas id="an-chart-last7"></canvas></div>
+        <div class="chart-data-table-wrap" id="an-chart-last7-table" hidden></div>
+      </div>
+
       <div class="section-title"><h2><svg class="section-title__icon" aria-hidden="true"><use href="#icon-star"/></svg>This month's recap</h2></div>
       <div id="an-recap-wrap"></div>
 
@@ -4820,6 +4849,8 @@ const App = {
       this.wireChartTableToggle('an-chart-income-expense-table');
     }
 
+    this.renderDailyRecap(document.getElementById('an-daily-recap-wrap'), all);
+    this.renderLast7DaysChart(all);
     this.renderMonthlyRecap(document.getElementById('an-recap-wrap'), all);
   },
 
